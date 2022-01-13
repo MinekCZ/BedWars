@@ -18,13 +18,13 @@ class Commands extends Command
     /** @var Player[] */
     public array $inSetup = [];
 
-    public BedWars $BedWars;
+    public BedWars $bedwars;
 
 
-    public function __construct(BedWars $BedWars)
+    public function __construct(BedWars $bedWars)
     {
-        parent::__construct("BedWars", "BedWars", null, ["pt"]);
-        $this->BedWars = $BedWars;
+        parent::__construct("bedwars", "BedWars", null, ["bw"]);
+        $this->bedwars = $bedWars;
     }
 
     public function execute(CommandSender $sender, string $commandLabel, array $args)
@@ -56,9 +56,9 @@ class Commands extends Command
         if(count($args) == 0) {
             $sender->sendMessage(
             
-                "BedWars\n" .
-                "/pt join | /pt join <arena>\n" .
-                "/pt leave\n" .
+                "§cBedWars\n" .
+                "§o§7/bw join | /bw join <arena>\n" .
+                "§o§7/bw leave\n" .
                 ""
             );
 
@@ -70,9 +70,9 @@ class Commands extends Command
             case "join":
                 if(!$sender instanceof Player) { $sender->sendMessage("§cNot Available in console!"); return; }
 
-                if(isset($args[1]) && isset($this->BedWars->arenas[$args[1]])) 
+                if(isset($args[1]) && isset($this->bedwars->arenas[$args[1]])) 
                 {
-                    $this->BedWars->arenas[$args[1]]->JoinPlayer($sender);
+                    $this->bedwars->arenas[$args[1]]->JoinPlayer($sender);
                     break;
                 }
 
@@ -93,7 +93,7 @@ class Commands extends Command
                 }
                 break;
             default:
-            $sender->sendMessage("\n§7Unknown argument §c\"{$args[0]}\"§7!\n§7\"/pt\" for help");
+            $sender->sendMessage("\n§7Unknown argument §c\"{$args[0]}\"§7!\n§7\"/bw\" for help");
                 break;
         }
     }
@@ -103,11 +103,11 @@ class Commands extends Command
         if(count($args) == 0) {
             $sender->sendMessage(
             
-                "§cPalermo§fTown\n" .
-                "§o§7/pt join | /pt join <arena>\n" .
-                "§o§7/pt leave\n" . 
-                "§o§7/pt list\n" .
-                "§o§7/pt admin [help | create | remove | setup (player only) | list]"
+                "§cBedWars\n" .
+                "§o§7/bw join | /bw join <arena>\n" .
+                "§o§7/bw leave\n" . 
+                "§o§7/bw list\n" .
+                "§o§7/bw admin [help | create | remove | setup (player only) | list]"
             );
 
             return;
@@ -118,9 +118,9 @@ class Commands extends Command
             case "join":
                 if(!$sender instanceof Player) { $sender->sendMessage("§cNot Available in console!"); return; }
 
-                if(isset($args[1]) && isset($this->BedWars->arenas[$args[1]])) 
+                if(isset($args[1]) && isset($this->bedwars->arenas[$args[1]])) 
                 {
-                    $this->BedWars->arenas[$args[1]]->JoinPlayer($sender);
+                    $this->bedwars->arenas[$args[1]]->JoinPlayer($sender);
                     break;
                 }
 
@@ -144,7 +144,7 @@ class Commands extends Command
 
                 $sender->sendMessage("\n§7Loaded Arenas: ");
 
-                foreach($this->BedWars->arenas as $arena) 
+                foreach($this->bedwars->arenas as $arena) 
                 {
                     $sender->sendMessage("§o§7- {$arena->data["id"]}");
                 }
@@ -158,7 +158,7 @@ class Commands extends Command
                 break;
 
             default:
-                $sender->sendMessage("§cUnknown arg ({$args[0]})! \"/pt\" for help");
+                $sender->sendMessage("§cUnknown arg ({$args[0]})! \"/bw\" for help");
                 break;
         }
     }
@@ -167,7 +167,7 @@ class Commands extends Command
     {
         if(count($args) == 0) 
         {
-            $sender->sendMessage("§7[help | create | remove | setup | list]");
+            $sender->sendMessage("§7[help | create | remove | setup]");
             return;
         }
 
@@ -178,21 +178,21 @@ class Commands extends Command
                 $sender->sendMessage(
 
                     "How to setup: \n" .
-                    "\n1. Create arena     : /pt admin create \"arena name\"\n" .
-                      "2. Enter setup mode : /pt admin setup \"arena name\"\n"  .
-                      "3. For more info    : \"/pt\"  \n"
+                    "\n1. Create arena     : /bw admin create \"arena name\"\n" .
+                      "2. Enter setup mode : /bw admin setup \"arena name\"\n"  .
+                      "3. For more info    : \"/bw\"  \n"
                 );
                 break;
 
 
             case "create":
 
-                if(!isset($args[1])) { $sender->sendMessage("§7Please enter arena name. /pt admin create §c\"arena name\""); return; }
+                if(!isset($args[1])) { $sender->sendMessage("§7Please enter arena name. /bw admin create §c\"arena name\""); return; }
 
                 $this->data = ArenaLoader::GetBasicData($args[1]);
 
                 $sender->sendMessage("\n§7Arena with name {$args[1]} is created");
-                $sender->sendMessage("§7\"/pt admin setup\" to setup arena");
+                $sender->sendMessage("§7\"/bw admin setup\" to setup arena");
 
                 break;
             case "remove":
@@ -201,7 +201,7 @@ class Commands extends Command
 
                 if(empty($this->data)) 
                 {
-                    $sender->sendMessage("§cNo data found! §7\"/pt admin create <arena_name>\"");
+                    $sender->sendMessage("§cNo data found! §7\"/bw admin create <arena_name>\"");
                     return;
                 }
 
@@ -209,14 +209,12 @@ class Commands extends Command
 
                 $this->inSetup[$sender->getName()] = $sender;
 
-                $sender->sendMessage("§7You're now in setup mode. \"/pt\" for more info");
+                $sender->sendMessage("§7You're now in setup mode. \"/bw\" for more info");
 
-                break;
-            case "list":
                 break;
             case "load":
 
-                if(!isset($args[1])) { $sender->sendMessage("\n§7Please enter arena name. /pt admin load §c\"arena name\""); return; }
+                if(!isset($args[1])) { $sender->sendMessage("\n§7Please enter arena name. /bw admin load §c\"arena name\""); return; }
 
                 if(!is_file($this->getDataFolder() . "data\\{$args[1]}.yml")) 
                 {
@@ -228,12 +226,12 @@ class Commands extends Command
                 $this->data = $config->getAll();
 
                 $sender->sendMessage("\n§7Arena with name §c\"{$args[1]}\" §7is loaded in memory");
-                $sender->sendMessage("§7\"/pt admin setup\" to setup arena");
+                $sender->sendMessage("§7\"/bw admin setup\" to setup arena");
 
 
                 break;
             default:
-                $sender->sendMessage("\n§7Unknown argument §c\"{$args[0]}\"§7!\n§7\"/pt admin\" for help");
+                $sender->sendMessage("\n§7Unknown argument §c\"{$args[0]}\"§7!\n§7\"/bw admin\" for help");
                 break;
         }
     }
@@ -243,11 +241,11 @@ class Commands extends Command
         if(count($args) == 0) {
             $sender->sendMessage(
             
-                "§cPalermo§7Town Editor\n" .
-                "§7§o/pt info\n" .
-                "§7§o/pt dump [key]\n" .
-                "§7§o/pt reset\n" .
-                "§7§o/pt set <data> <arg>\n" .
+                "§cBedWars §7Editor\n" .
+                "§7§o/bw info\n" .
+                "§7§o/bw dump [key]\n" .
+                "§7§o/bw reset\n" .
+                "§7§o/bw set <data> <arg>\n" .
                 ""
             );
 
@@ -307,13 +305,8 @@ class Commands extends Command
                 {
                     $sender->sendMessage("\n§cIncorrect Format!");
 
-                    $sender->sendMessage("\n§7/pt set <key> <value>");
-                    $sender->sendMessage("§7/pt set <key> <index (num)> <value>");
-
-                    $sender->sendMessage("\n§7§oExample: /pt set name ExampleName");
-                    $sender->sendMessage("§7§oExample: /pt set spawn 1 player_pos");
-                    $sender->sendMessage("§7§oExample: /pt set chests 3 look_block");
-                    $sender->sendMessage("§7§oExample: /pt set spawn 3 look_pos");
+                    $sender->sendMessage("\n§7/bw set <key> <value>");
+                    $sender->sendMessage("§7/bw set <key> <index> <value>");
                     return;
                 }
 
@@ -321,7 +314,7 @@ class Commands extends Command
 
                 if(!isset($this->data[$key])) 
                 {
-                    $sender->sendMessage("\n§cKey §7\"{$key}\" §cdoesn't exists in data\n§7\"/pt info\" to show Available keys");
+                    $sender->sendMessage("\n§cKey §7\"{$key}\" §cdoesn't exists in data\n§7\"/bw info\" to show Available keys");
                     return;
                 }
 
@@ -329,7 +322,7 @@ class Commands extends Command
                 {
 
                     $kexists = "\n§7Key §c\"{$key}\"§7 exists.\n";
-                    $tformat = "§c> §7Use this format: §7/pt set {$key} §c<index> <value>";
+                    $tformat = "§c> §7Use this format: §7/bw set {$key} §c<index> <value>";
 
                     if(!isset($args[2])) 
                     {
@@ -340,15 +333,8 @@ class Commands extends Command
 
                     $index = $args[2];
 
-                    if(!is_numeric($index)) 
-                    {
-                        $sender->sendMessage($kexists . "§cSecond argument must be number §7(your input: §c{$index}§7)");
-                        $sender->sendMessage($tformat);
-                        return;
-                    }
-
                     $kexists = "\n§7Key §c\"{$key}\" §7and index §c\"{$index}\"§7 is valid.\n";
-                    $tformat = "§c> §7Use this format: §7/pt set {$key} {$index} §c<value>§7";
+                    $tformat = "§c> §7Use this format: §7/bw set {$key} {$index} §c<value>§7";
 
                     if(!isset($args[3])) 
                     {
@@ -387,24 +373,24 @@ class Commands extends Command
                             return;
                     }
 
-                    if($key == "chests") 
+                    if($key == "generator") 
                     {
                         if($block == null) 
                         {
-                            $sender->sendMessage("\n§7Chests key require §c\"look_block\" argument\n§c> §7Use this format: /pt set {$key} {$index} §clook_block");
+                            $sender->sendMessage("\n§7Generator key require §c\"look_block\" argument\n§c> §7Use this format: /bw set {$key} {$index} §clook_block");
                             return;
                         }
 
-                        $this->data[$key][$index] = [$value, $block->getMeta()];
+                        $this->data[$key][$index] = [$value, $block->getId(), $block->getMeta()];
                         $sender->sendMessage("\n§7Key §a\"{$key}-{$index}\" §7has been successfully §aset §7to §a\"{$value}\"");
-                        $sender->sendMessage("§a> §7You can use §a\"/pt info\" or §a\"/pt dump\" §7for detailed info");
+                        $sender->sendMessage("§a> §7You can use §a\"/bw info\" or §a\"/bw dump\" §7for detailed info");
 
                         return;
                     }
 
                     $this->data[$key][$index] = $value;
                     $sender->sendMessage("\n§7Key §a\"{$key}-{$index}\" §7has been successfully §aset §7to §a\"{$value}\"");
-                    $sender->sendMessage("§a> §7You can use §a\"/pt info\" or §a\"/pt dump\" §7for detailed info");
+                    $sender->sendMessage("§a> §7You can use §a\"/bw info\" or §a\"/bw dump\" §7for detailed info");
                     return;
 
 
@@ -412,7 +398,7 @@ class Commands extends Command
                 {
                     if(!isset($args[2])) 
                     {
-                        $sender->sendMessage("\n§7Key §c\"{$key}\"§7 exists.\n§c > §7Use this format: /pt set {$key} §c<value>");
+                        $sender->sendMessage("\n§7Key §c\"{$key}\"§7 exists.\n§c > §7Use this format: /bw set {$key} §c<value>");
                         $sender->sendMessage("§cOptional value: §7\"player_pos\", \"look_block\", \"look_pos\"");
                         return;
                     }
@@ -443,7 +429,7 @@ class Commands extends Command
                     $this->data[$key] = $value;
 
                     $sender->sendMessage("\n§7Key §a\"{$key}\" §7has been successfully §aset §7to §a\"{$value}\"");
-                    $sender->sendMessage("§a> §7You can use §a\"/pt info\" or §a\"/pt dump\" §7for detailed info");
+                    $sender->sendMessage("§a> §7You can use §a\"/bw info\" or §a\"/bw dump\" §7for detailed info");
 
                     return;
                 }
@@ -481,15 +467,15 @@ class Commands extends Command
 
                 $sender->sendMessage("\n§7Saving §a\"{$game}\"§7...");
 
-                $this->BedWars->saveMap($this->getServer()->getWorldManager()->getWorldByName($game));
+                $this->bedwars->saveMap($this->getServer()->getWorldManager()->getWorldByName($game));
 
                 if($this->data["savelobby"] == "true" && $lobby != $game) 
                 {
                     $sender->sendMessage("\n§7Saving §a\"{$lobby}\"§7...");
-                    $this->BedWars->saveMap($this->getServer()->getWorldManager()->getWorldByName($lobby));
+                    $this->bedwars->saveMap($this->getServer()->getWorldManager()->getWorldByName($lobby));
                 } elseif ($lobby != $game)
                 {
-                    $sender->sendMessage("\n§7To §asave§7 the §alobby §7map, use §a\"/pt set savelobby true\"");
+                    $sender->sendMessage("\n§7To §asave§7 the §alobby §7map, use §a\"/bw set savelobby true\"");
                 }
 
 
@@ -500,7 +486,7 @@ class Commands extends Command
 
 
             default:
-                $sender->sendMessage("\n§7Unknown argument §c\"{$args[0]}\"§7!\n§7\"/pt\" for help");
+                $sender->sendMessage("\n§7Unknown argument §c\"{$args[0]}\"§7!\n§7\"/bw\" for help");
                 break;
         }
     }
@@ -513,11 +499,11 @@ class Commands extends Command
 
     public function getDataFolder() :string
     {
-        return $this->BedWars->getDataFolder();
+        return $this->bedwars->getDataFolder();
     }
 
     public function getServer() :Server
     {
-        return $this->BedWars->getServer();
+        return $this->bedwars->getServer();
     }
 }

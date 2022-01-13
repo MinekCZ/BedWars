@@ -15,14 +15,18 @@ class ArenaLoader
         $final = [];
         $final["id"]          = $id;
         $final["name"]        = "";
-        $final["slots"]       = 0;
-        $final["arrow_price"] = 10;        
+        $final["slots"]       = 0;    
         $final["world_lobby"] = "";
         $final["world_game"]  = "";
         $final["lobby"]       = "";
-        $final["chests"]      = [];
-        $final["spawns"]      = [];
+        $final["spectator"] = [];
         $final["savelobby"]   = "false";
+
+        $final["teams"] = [];
+        $final["spawns"] = [];
+        $final["generators"] = [];
+        $final["shops"] = [];
+
         $final["enabled"]     = "false";
 
         return $final;

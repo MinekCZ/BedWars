@@ -25,10 +25,10 @@ class BedWars extends PluginBase
     public function onEnable() : void 
     {
         self::$bedwars = $this;
-        $this->getLogger()->info("§cLoading PalermoTown...");
+        $this->getLogger()->info("§cLoading BedWars...");
 
         $this->commands = new Commands($this);
-        $this->getServer()->getCommandMap()->register("palermotown", $this->commands, "PalermoTown");
+        $this->getServer()->getCommandMap()->register("bedwars", $this->commands, "BedWars");
 
         $this->saveResource("lang.yml");
         $lang = new Config($this->getDataFolder() . "lang.yml", Config::YAML);
