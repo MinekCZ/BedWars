@@ -1,54 +1,45 @@
 prefix: "§cPalermo§7Town"
 
 waiting_player: "§7Waiting for players..."
-lobby_starting_tip: "§cMurder: §7{murder_percent}% §bSherif §7{sherif_percent}% | §7Starting in: §a{time}"
+lobby_starting_tip: "§7Team: {team}§7 | Time: §a{time}"
+join_team: "§a> §7You've been joined to {team} §7team"
 
-pregame_tip: "§7Murder get their sword in: §c{time}"
-game_tip: "§7Role: {role} §7| §7Time left: §a{time}"
+pregame_tip: "§7Game is starting in: §c{time}"
+game_tip: "§7Team: {team} §7| §7Time left: §a{time}"
 endgame_tip : "§7Teleporting to lobby in: §a{time}"
 
 arena_join: "§7[§a+§7] §7{player}"
 arena_leave: "§7[§c-§7] §7{player}"
-arena_welcome: "\n§7Welcome to §cPalermo§7Town!"
+arena_welcome: "\n§7Welcome to §cBedWars!"
 
-killed_by_now_spectator: "\n§7You've been killed by {role}\n§7§oYou're now spectator"
-killed_now_spectator: "§7You've have been killed.\n§7§oYou're now spectator"
+killed_by_now_spectator: "\n§7You've been killed by {team} {player}\n§7§oYou're now spectator"
+killed_now_spectator: "§7You're death.\n§7§oYou're now spectator"
+
+killed_by: "\n§7You've been killed by {team} {player}"
+killed: "§7You're death."
 
 
 game_starting_soon: "\n§7> Game is starting soon!"
-game_started:       "\n§7> Game has started! Murder has their sword!"
+game_started:       "\n§7> Game has started!"
 
-item_murder_sword  : "§cMurder's sword"
-item_murder_fakebow: "§7§ofakeBow"
-item_sherif_bow    : "§o§bSherif's bow"
-item_arrow         : "§7Arrow"
-item_innocent_bow  : "§7Bow"
-item_ingot         : "§6§oIngot"
+item_gold         : "§6§oGold"
+item_bronze       : "§c§oBronze"
+item_iron         : "§7§oIron"
 
 item_cannot_use    : "§c> §7You cannot use this item!"
-item_bought_arrow  : "§6> §7You have bought arrow!"
+item_bought        : "§6> §7You have bought {item}"
 
 
-innocent_win_title: "§aInnocents Won!"
-innocent_win_info : "\n§7Won: §aInnocents\n§7---"
-murder_win_title  : "§cMurder won!"
-murder_win_info   : "\n§7Won: §cMurder"
+win_title: "{team} Won!"
+win_info_msg : "\n§7Won: {team}\n§7---"
 
-
-win_info: "§cMurder: §7{murder} \n§bSherif: §7{sherif}"
+win_info_players: "{team}§7: {players}"
 
 
 
-start_title_murder: "§cMurder"
-start_subtitle_murder: "§o§7Kill all your opponents!"
-start_title_sherif: "§bSherif"
-start_subtitle_sherif: "§o§7Kill Murder!"
-start_title_innocent: "§aInnocent"
-start_subtitle_innocent: "§o§7Survive as long as possible!"
+start_title: "{team}"
+start_subtitle: "§o§7{players}"
+start_team_info: "\n§7Your Team: {players}"
 
-
-murder:    "§cMurder"
-sherif:    "§bSherif"
-innocent:  "§aInnocent"
 spectator: "§7Spectator"
 none:      "§7None"

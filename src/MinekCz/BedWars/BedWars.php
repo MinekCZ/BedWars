@@ -20,6 +20,8 @@ class BedWars extends PluginBase
     /** @var Arena[] */
     public array $arenas;
 
+    public bool $debug = true;
+
     
     
     public function onEnable() : void 
@@ -30,11 +32,16 @@ class BedWars extends PluginBase
         $this->commands = new Commands($this);
         $this->getServer()->getCommandMap()->register("bedwars", $this->commands, "BedWars");
 
+        $this->Load();
+
         $this->saveResource("lang.yml");
         $lang = new Config($this->getDataFolder() . "lang.yml", Config::YAML);
         Lang::$lang = $lang->getAll();
 
-        $this->Load();
+        if($this->debug) 
+        {
+            $this->getLogger()->error("! Debug Active !");
+        }
     }
 
     //Api::
@@ -242,6 +249,11 @@ class BedWars extends PluginBase
 
         if(!is_dir($this->getDataFolder() . "data\\saves")) {
             @mkdir($this->getDataFolder() . "data\\saves");
+        }
+
+        if($this->debug) 
+        {
+            unlink($this->getDataFolder() . "lang.yml");
         }
 
         

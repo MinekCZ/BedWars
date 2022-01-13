@@ -30,6 +30,7 @@ class Arena
 
     public ArenaTask $task;
     public ArenaListener $listener;
+    public TeamManager $teams;
 
 
     //Worlds::
@@ -47,19 +48,6 @@ class Arena
     
     /** @var Player[] */
     public array $spectators = [];
-
-    /** @var Player|null */
-    public $murder;
-    /** @var Player|null */
-    public $sherif;
-
-    /** @var Player[] */
-    public array  $innocents;
-
-    public array $percents = [];
-    public array $percents_final = [];
-
-    public array $original_roles = [];
 
 
     //Time::
@@ -86,6 +74,7 @@ class Arena
 
         $this->task = new ArenaTask($BedWars, $this);
         $this->listener = new ArenaListener($BedWars, $this);
+        $this->teams = new TeamManager($this, $this->data["teams"], $this->data["playersPerTeam"]);
 
         $this->bedwars->getScheduler()->scheduleRepeatingTask($this->task, 20);
         $this->bedwars->getServer()->getPluginManager()->registerEvents($this->listener, $this->bedwars);
@@ -107,6 +96,7 @@ class Arena
             if($this->data["lobby"] == "") return;
             if($this->data["spectator"] == "") return;
             if($this->data["slots"] == 0) return;
+            if($this->data["playersPerTeam"] == 0) return;
     
             if($this->data["name"] == "") $this->data["name"] = $this->data["id"];
         } catch(Exception $e)
@@ -244,6 +234,8 @@ class Arena
             [
             $player->getName()
         ]));
+
+        $this->teams->JoinTeam($player);
     }
 
     public function KillPlayer(Player $player, Player $by = null) 
@@ -342,6 +334,21 @@ class Arena
     }
 
 
+    public function GetTeamPretty(Player $player) :string
+    {
+        $team = $this->teams->GetTeam($player);
+
+        return $team != null ? $team->display : Lang::get("spectator");
+    }
+
+    public function GetTeam(Player $player) :string
+    {
+        $team = $this->teams->GetTeam($player);
+
+        return $team != null ? $team->id : "spectator";
+    }
+
+
 
 
     public function startGame() 
@@ -353,7 +360,7 @@ class Arena
             $player->getInventory()->clearAll();
             $player->getInventory()->clearAll();
 
-            $vec = BedWars::StringToVec($this->data["spawns"][array_rand($this->data["spawns"])]);
+            $vec = BedWars::StringToVec($this->data["teamspawn"][$this->teams->GetTeam($player)->id]);
             $player->teleport(new Position($vec->x, $vec->y, $vec->z, $this->game_world));
         }
 
@@ -365,6 +372,13 @@ class Arena
         $this->state = self::state_game;
 
         $this->sendMessage(Lang::get("game_started"));
+
+        foreach($this->players as $player) 
+        {
+            $team = $this->teams->GetTeam($player);
+            $player->sendTitle(Lang::format("start_title", ["{team}"], [$team->display]), Lang::format("start_subtitle", ["{players}"], [join(", ", $team->List())]));
+            $player->sendMessage(Lang::format("start_team_info", ["{players}"], [join(", ", $team->List())]));
+        }
     }
 
     public function endGame() 
@@ -393,19 +407,12 @@ class Arena
 
         $this->state = self::state_lobby;
 
-        $this->murder = null;
-        $this->sherif = null;
-        $this->innocents = [];
-        $this->original_roles = [];
-        $this->percents = [];
-        $this->percents_final = [];
-
         $this->gameTime = 300;
         $this->lobbyTime = 15;
         $this->preGameTime = 10;
         $this->endTime = 10;
-        $this->sherifBow = 0;
-        $this->chestRefill = 30;
+
+        $this->teams = new TeamManager($this, $this->data["teams"], $this->data["playersPerTeam"]);
     }
 
     public function leaveAll() 

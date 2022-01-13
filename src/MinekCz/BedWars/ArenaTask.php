@@ -36,19 +36,16 @@ class ArenaTask extends Task
                     break;
                 }
 
-                $this->arena->CalculatePercents();
-
                 
                 $this->arena->lobbyTime--;
 
                 foreach($this->arena->players as $player) 
                 {
                     $player->sendActionBarMessage(Lang::format("lobby_starting_tip", 
-                    ["{murder_percent}", "{sherif_percent}", "{time}"], 
+                    ["{team}", "{time}"], 
                     [
-                    $this->arena->percents_final[$player->getName()]["murder"], 
-                    $this->arena->percents_final[$player->getName()]["sherif"], 
-                    $this->arena->lobbyTime
+                    $this->arena->GetTeamPretty($player),  
+                    $this->formatTime($this->arena->lobbyTime)
                     ]));
                 }
                 
@@ -65,7 +62,7 @@ class ArenaTask extends Task
                 $this->arena->sendActionBar(Lang::format("pregame_tip", 
                     ["{time}"], 
                     [
-                    $this->arena->preGameTime
+                    $this->formatTime($this->arena->preGameTime)
                 ]));
                 
 
@@ -84,31 +81,11 @@ class ArenaTask extends Task
                 foreach($this->arena->players + $this->arena->spectators as $player) 
                 {
                     $player->sendActionBarMessage(Lang::format("game_tip", 
-                        ["{role}", "{time}"], 
+                        ["{team}", "{time}"], 
                         [
-                        $this->arena->GetRolePretty($player), 
-                        $this->arena->gameTime
+                        $this->arena->GetTeamPretty($player), 
+                        $this->formatTime($this->arena->gameTime)
                     ]));
-                }
-
-                if($this->arena->sherifBow > 0 && $this->arena->sherif != null) 
-                {
-                    $this->arena->sherifBow--;
-                    
-
-                    if($this->arena->sherif->getInventory()->getItemInHand()->getId() == ItemIds::BOW) 
-                    {
-                        // 385 max
-                        $p = ($this->arena->sherifBow / 8 * 100);
-                        $d = (385 / 100) * $p;
-
-                        $this->arena->sherif->getInventory()->setItemInHand($this->arena->GetItem(ItemIds::BOW, $d, 1, Lang::get("item_sherif_bow")));
-                    }
-
-                    if($this->arena->sherifBow == 0) 
-                    {
-                        $this->arena->sherif->getInventory()->addItem($this->arena->GetItem(ItemIds::ARROW, 0, 1, Lang::get("item_arrow")));
-                    }
                 }
 
                 if($this->arena->gameTime == 0) 

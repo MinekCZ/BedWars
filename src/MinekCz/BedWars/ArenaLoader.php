@@ -27,6 +27,7 @@ class ArenaLoader
         $final["teamspawn"] = [];
         $final["generators"] = [];
         $final["shops"] = [];
+        $final["playersPerTeam"] = 1; 
 
         $final["enabled"]     = "false";
 
