@@ -1,0 +1,6 @@
+name: BedWars
+api: 4.0.0
+main: MinekCz\BedWars\BedWars
+version: 0.0.1
+description: "Popular BedWars minigame!"
+author: "MinekCz"
