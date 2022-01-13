@@ -3,6 +3,7 @@
 namespace MinekCz\BedWars;
 
 use AttachableLogger;
+use Exception;
 use pocketmine\block\Block;
 use pocketmine\block\BlockFactory;
 use pocketmine\block\BlockLegacyIds;
@@ -23,7 +24,7 @@ class Arena
 
 
     //Base::
-    public BedWars $BedWars;
+    public BedWars $bedwars;
     public array $data;
     public bool $enabled = false;
 
@@ -66,9 +67,6 @@ class Arena
     public int $lobbyTime;
     public int $preGameTime;
     public int $endTime;
-    public int $chestRefill;
-
-    public int $sherifBow;
 
 
 
@@ -76,7 +74,7 @@ class Arena
 
     public function __construct(BedWars $BedWars, array $data)
     {
-        $this->BedWars = $BedWars;
+        $this->bedwars = $BedWars;
         $this->data = $data;
 
         
@@ -89,20 +87,37 @@ class Arena
         $this->task = new ArenaTask($BedWars, $this);
         $this->listener = new ArenaListener($BedWars, $this);
 
-        $this->BedWars->getScheduler()->scheduleRepeatingTask($this->task, 20);
-        $this->BedWars->getServer()->getPluginManager()->registerEvents($this->listener, $this->BedWars);
+        $this->bedwars->getScheduler()->scheduleRepeatingTask($this->task, 20);
+        $this->bedwars->getServer()->getPluginManager()->registerEvents($this->listener, $this->bedwars);
         
     }
     public function init() 
     {
-        if(!count($this->data["spawns"]) > 0) return;
-        if(!count($this->data["chests"]) > 0) return;
-        if($this->data["world_game"] == "") return;
-        if($this->data["world_lobby"] == "") return;
-        if($this->data["lobby"] == "") return;
-        if($this->data["slots"] == 0) return;
-
-        if($this->data["name"] == "") $this->data["name"] = $this->data["id"];
+        try 
+        {
+            if(!count($this->data["teamspawn"]) > 0) return;
+            if(!count($this->data["teambed"]) > 0) return;
+            if(!count($this->data["generators"]) > 0) return;
+            if(!count($this->data["teams"]) > 0) return;
+            if(!count($this->data["shops"]) > 0) return;
+    
+    
+            if($this->data["world_game"] == "") return;
+            if($this->data["world_lobby"] == "") return;
+            if($this->data["lobby"] == "") return;
+            if($this->data["spectator"] == "") return;
+            if($this->data["slots"] == 0) return;
+    
+            if($this->data["name"] == "") $this->data["name"] = $this->data["id"];
+        } catch(Exception $e)
+        {
+            if(isset($this->data["id"])) 
+            {
+                $this->getLogger()->error("Cannot load arena {$this->data["id"]}.yml");
+                $this->getLogger()->error("Error: {$e->getMessage()}");
+            }
+        }
+        
 
 
         
@@ -194,18 +209,6 @@ class Arena
             $player->getOffHandInventory()->clearAll();
 
             $player->teleport($this->getServer()->getWorldManager()->getDefaultWorld()->getSpawnLocation());
-
-            unset($this->percents[$player->getName()]);
-        }
-
-        if($player == $this->murder) 
-        {
-            $this->murder = null;
-        }
-
-        if($player == $this->sherif) 
-        {
-            $this->sherif = null;
         }
     }
 
@@ -228,20 +231,19 @@ class Arena
         $player->getInventory()->clearAll();
         $player->getOffHandInventory()->clearAll();
 
+        
+        $player->sendMessage(Lang::format("arena_welcome", 
+        ["{player}"], 
+        [
+            $player->getName()
+        ]));
+
+        if($spectator) return;
         $this->sendMessage(Lang::format("arena_join", 
             ["{player}"], 
             [
             $player->getName()
         ]));
-
-        $player->sendMessage(Lang::format("arena_welcome", 
-            ["{player}"], 
-            [
-            $player->getName()
-        ]));
-
-        $this->percents[$player->getName()]["murder"] = rand(0, 20);
-        $this->percents[$player->getName()]["sherif"] = rand(0, 20);
     }
 
     public function KillPlayer(Player $player, Player $by = null) 
@@ -249,29 +251,18 @@ class Arena
         if($by != null) 
         {
 
-            $player->sendMessage(Lang::format("killed_by_now_spectator", 
-                ["{role}"], 
-                [
-                $this->GetRolePretty($by)
-            ]));
+            //$player->sendMessage(Lang::format("killed_by_now_spectator", 
+            //    ["{role}"], 
+            //    [
+            //    $this->GetRolePretty($by)
+            //]));
 
         } else 
         {
             $player->sendMessage(Lang::get("killed_now_spectator"));
         }
 
-        //TODO:: Check $this->murder-> & $this->sherif->
-        if($player == $this->murder) 
-        {
-            $this->murder = null;
-        }
-        if($player == $this->sherif) 
-        {
-            $this->sherif = null;
-            $this->game_world->dropItem($player->getPosition(), $this->GetItem(ItemIds::BOW, 0, 1, Lang::get("item_sherif_bow")));
-        }
-
-        $this->JoinSpectator($player);
+        //$this->JoinSpectator($player);
 
 
         $this->CheckPlayers();
@@ -335,49 +326,10 @@ class Arena
             $this->endGame();
             return;
         }
-
-        if($this->murder == null) 
-        {
-            $this->endGame();
-            return;
-        }
         
     }
 
-    public function CalculatePercents() 
-    {
-        $msum = 0;
-        $ssum = 0;
 
-        foreach($this->players as $player) 
-        {
-            $msum += $this->percents[$player->getName()]["murder"];
-            $ssum += $this->percents[$player->getName()]["sherif"];
-        }
-
-        if($msum == 0 || $ssum == 0) 
-        {
-            $msum = 1;
-            $ssum = 1;
-        }
-
-        foreach($this->players as $player) 
-        {
-            $this->percents_final[$player->getName()]["murder"] = (int)(($this->percents[$player->getName()]["murder"] / $msum) * 100); 
-            $this->percents_final[$player->getName()]["sherif"] = (int)(($this->percents[$player->getName()]["sherif"] / $ssum) * 100); 
-        }
-    }
-
-
-    public function GetRole(Player $player) :string 
-    {
-        if(isset($this->innocents[$player->getName()])) return "Innocent";
-        if($player == $this->murder) return "Murder";
-        if($player == $this->sherif) return "Sherif";
-        if(isset($this->spectators[$player->getName()])) return "Spectator";
-
-        return "none";
-    }
 
     public function JoinSpectator(Player $player) 
     {
@@ -387,31 +339,14 @@ class Arena
         $player->getInventory()->clearAll();
 
         if(isset($this->players[$player->getName()])) unset($this->players[$player->getName()]);
-
-
     }
 
-
-
-    public function GetRolePretty(Player $player) :string 
-    {
-        if(isset($this->innocents[$player->getName()])) return Lang::get("innocent");
-        if($player == $this->murder) return Lang::get("murder");
-        if($player == $this->sherif) return Lang::get("sherif");
-        if(isset($this->spectators[$player->getName()])) return Lang::get("spectator");
-
-        return Lang::get("none");
-    }
 
 
 
     public function startGame() 
     {
         $this->state = self::state_pregame;
-
-        $murder = [null, 0];
-        $sherif = [null, 0];
-
         
         foreach($this->players + $this->spectators as $player) 
         {
@@ -422,57 +357,6 @@ class Arena
             $player->teleport(new Position($vec->x, $vec->y, $vec->z, $this->game_world));
         }
 
-
-        //murder::
-        foreach($this->players as $player) 
-        {
-            if($this->percents[$player->getName()]["murder"] > $murder[1]) 
-            {
-                $murder = [$player, $this->percents[$player->getName()]["murder"]];
-            }
-        }
-
-        //sherif::
-        foreach($this->players as $player) 
-        {
-            if($this->percents[$player->getName()]["sherif"] > $sherif[1]) 
-            {
-                if($player == $murder[0]) 
-                {
-                    continue;
-                }
-                $sherif = [$player, $this->percents[$player->getName()]["sherif"]];
-            }
-        }
-
-
-        foreach($this->players as $player) 
-        {
-            if($murder[0] == $player) 
-            {
-                $this->murder = $player;
-                $player->sendTitle(Lang::get("start_title_murder"), Lang::get("start_subtitle_murder"));
-                continue;
-            }
-
-            if($sherif[0] == $player) 
-            {
-                $this->sherif = $player;
-                $player->sendTitle(Lang::get("start_title_sherif"), Lang::get("start_subtitle_sherif"));
-                continue;
-            }
-
-            $this->innocents[$player->getName()] = $player;
-            $player->sendTitle(Lang::get("start_title_innocent"), Lang::get("start_subtitle_innocent"));
-        }
-
-
-        $this->original_roles["murder"] = $this->murder;
-        $this->original_roles["sherif"] = $this->sherif;
-
-
-        
-
         $this->sendMessage(Lang::get("game_starting_soon"));
     }
 
@@ -481,20 +365,6 @@ class Arena
         $this->state = self::state_game;
 
         $this->sendMessage(Lang::get("game_started"));
-
-        $this->murder->getInventory()->setItem(1, $this->GetItem(ItemIds::IRON_SWORD, 0, 1, Lang::get("item_murder_sword")));
-        $this->murder->getInventory()->setItem(2, $this->GetItem(ItemIds::BOW, 0, 1, Lang::get("item_murder_fakebow")));
-
-
-        $this->sherif->getInventory()->setItem(1, $this->GetItem(ItemIds::BOW, 0, 1, Lang::get("item_sherif_bow")));
-        $this->sherif->getInventory()->setItem(2, $this->GetItem(ItemIds::ARROW, 0, 1, Lang::get("item_arrow")));
-
-        foreach($this->innocents as $inno) 
-        {
-            $inno->getInventory()->setItem(1, $this->GetItem(ItemIds::BOW, 0, 1, Lang::get("item_innocent_bow")));
-        }
-
-
     }
 
     public function endGame() 
@@ -504,46 +374,6 @@ class Arena
         foreach($this->players as $player) 
         {
             $this->JoinSpectator($player);
-        }
-
-        if($this->murder == null) 
-        {
-            $this->sendTitle(Lang::get("innocent_win_title"));
-            $this->sendMessage(Lang::get("prefix") . Lang::get("innocent_win_info"));
-
-            $this->sendMessage(Lang::format("win_info", 
-                        ["{murder}", "{sherif}"], 
-                        [
-                        $this->original_roles["murder"]->getName(), 
-                        $this->original_roles["sherif"]->getName()
-            ]));
-        }
-
-        if($this->murder != null) 
-        {
-            if($this->gameTime == 0) 
-            {
-                $this->sendTitle(Lang::get("innocent_win_title"));
-                $this->sendMessage(Lang::get("prefix") . Lang::get("innocent_win_info"));
-
-                $this->sendMessage(Lang::format("win_info", 
-                        ["{murder}", "{sherif}"], 
-                        [
-                        $this->original_roles["murder"]->getName(), 
-                        $this->original_roles["sherif"]->getName()
-                ]));
-            } else 
-            {
-                $this->sendTitle(Lang::get("murder_win_title"));
-                $this->sendMessage(Lang::get("prefix") . Lang::get("murder_win_info"));
-
-                $this->sendMessage(Lang::format("win_info", 
-                        ["{murder}", "{sherif}"], 
-                        [
-                        $this->original_roles["murder"]->getName(), 
-                        $this->original_roles["sherif"]->getName()
-                ]));
-            }
         }
     }
 
@@ -591,10 +421,10 @@ class Arena
         $g = $this->data["world_game"];
         $l = $this->data["world_lobby"];
 
-        if(!$this->BedWars->loadMap($g)) return;
+        if(!$this->bedwars->loadMap($g)) return;
         if($this->data["savelobby"] == "true") 
         {
-            if(!$this->BedWars->loadMap($l)) return;
+            if(!$this->bedwars->loadMap($l)) return;
         }
 
         $this->getServer()->getWorldManager()->loadWorld($g);
@@ -602,19 +432,6 @@ class Arena
 
         $this->lobby_world = $this->getServer()->getWorldManager()->getWorldByName($l);
         $this->game_world  = $this->getServer()->getWorldManager()->getWorldByName($g);
-
-        $this->generateChests();
-    }
-
-    public function generateChests() 
-    {
-        $chests = $this->data["chests"];
-        
-        foreach($chests as $chest) 
-        {
-            $vec = BedWars::StringToVec($chest[0]);
-            $this->game_world->setBlock($vec, $this->GetBlock(BlockLegacyIds::CHEST, (int)$chest[1]), true);
-        }
     }
 
     public function sendMessage(string $msg) 
@@ -646,12 +463,12 @@ class Arena
 
     public function getServer() :Server
     {
-        return $this->BedWars->getServer();
+        return $this->bedwars->getServer();
     }
 
     public function getLogger() :AttachableLogger
     {
-        return $this->BedWars->getLogger();
+        return $this->bedwars->getLogger();
     }
 
     public function GetItem(int $id, int $meta, int $count, string $name) :Item 

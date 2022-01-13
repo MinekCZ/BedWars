@@ -19,11 +19,12 @@ class ArenaLoader
         $final["world_lobby"] = "";
         $final["world_game"]  = "";
         $final["lobby"]       = "";
-        $final["spectator"] = [];
+        $final["spectator"]   = "";
         $final["savelobby"]   = "false";
 
         $final["teams"] = [];
-        $final["spawns"] = [];
+        $final["teambed"] = [];
+        $final["teamspawn"] = [];
         $final["generators"] = [];
         $final["shops"] = [];
 

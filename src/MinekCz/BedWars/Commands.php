@@ -367,10 +367,10 @@ class Commands extends Command
                             $value = BedWars::VecToString($sender->getTargetBlock(4, [])->getPosition()->addVector(new Vector3(0, 1, 0)));
                             break;
                         default:
-
-                            $sender->sendMessage($kexists . $tformat);
-                            $sender->sendMessage("§c! §7Available values in this context are: \"player_pos\", \"look_block\", \"look_pos\"");
-                            return;
+                            $value = $value_arg;
+                            //$sender->sendMessage($kexists . $tformat);
+                            //$sender->sendMessage("§c! §7Available values in this context are: \"player_pos\", \"look_block\", \"look_pos\"");
+                            break;
                     }
 
                     if($key == "generator") 
