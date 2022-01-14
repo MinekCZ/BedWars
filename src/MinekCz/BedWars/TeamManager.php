@@ -38,6 +38,8 @@ class TeamManager
 
         $team->bed = true;
         $team->alive = true;
+
+        $player->sendMessage(Lang::format("join_team", ["{team}"], [$team->display]));
     }
 
     /** @return Team[] */
@@ -48,8 +50,15 @@ class TeamManager
 
         foreach($this->teams as $team) 
         {
+            
             if($team->alive) 
             {
+                //var_dump("{$team->id} : " . count($team->players));
+                if(count($team->players) == 0) 
+                {
+                    $team->alive = false;
+                    continue;
+                }
                 $final[$team->id] = $team;
             }
         }
@@ -63,6 +72,8 @@ class TeamManager
         if($team == null) return;
 
         unset($team->players[$player->getName()]);
+
+        var_dump($player->getName());
     }
 
     public function GetTeam(Player $player) :?Team

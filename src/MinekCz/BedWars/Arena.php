@@ -173,35 +173,42 @@ class Arena
             $this->sendMessage("§7[§c-§7] {$player->getName()}");
             unset($this->players[$player->getName()]);
 
-            $player->setGamemode(GameMode::SURVIVAL());
-            $player->setHealth(20);
-            $player->getHungerManager()->setFood(20);
-            $player->getXpManager()->setXpLevel(0);
-            $player->getXpManager()->setXpProgress(0);
-            $player->getInventory()->clearAll();
-            $player->getArmorInventory()->clearAll();
-            $player->getInventory()->clearAll();
-            $player->getOffHandInventory()->clearAll();
-
-            $player->teleport($this->getServer()->getWorldManager()->getDefaultWorld()->getSpawnLocation());
+            if($player->isOnline()) 
+            {
+                $player->setGamemode(GameMode::SURVIVAL());
+                $player->setHealth(20);
+                $player->getHungerManager()->setFood(20);
+                $player->getXpManager()->setXpLevel(0);
+                $player->getXpManager()->setXpProgress(0);
+                $player->getInventory()->clearAll();
+                $player->getArmorInventory()->clearAll();
+                $player->getInventory()->clearAll();
+                $player->getOffHandInventory()->clearAll();
+    
+                $player->teleport($this->getServer()->getWorldManager()->getDefaultWorld()->getSpawnLocation());
+            }
             
+            $this->teams->LeaveTeam($player);
         }
 
         if(isset($this->spectators[$player->getName()])) 
         {
             unset($this->spectators[$player->getName()]);
 
-            $player->setGamemode(GameMode::SURVIVAL());
-            $player->setHealth(20);
-            $player->getHungerManager()->setFood(20);
-            $player->getXpManager()->setXpLevel(0);
-            $player->getXpManager()->setXpProgress(0);
-            $player->getInventory()->clearAll();
-            $player->getArmorInventory()->clearAll();
-            $player->getInventory()->clearAll();
-            $player->getOffHandInventory()->clearAll();
-
-            $player->teleport($this->getServer()->getWorldManager()->getDefaultWorld()->getSpawnLocation());
+            if($player->isOnline()) 
+            {
+                $player->setGamemode(GameMode::SURVIVAL());
+                $player->setHealth(20);
+                $player->getHungerManager()->setFood(20);
+                $player->getXpManager()->setXpLevel(0);
+                $player->getXpManager()->setXpProgress(0);
+                $player->getInventory()->clearAll();
+                $player->getArmorInventory()->clearAll();
+                $player->getInventory()->clearAll();
+                $player->getOffHandInventory()->clearAll();
+    
+                $player->teleport($this->getServer()->getWorldManager()->getDefaultWorld()->getSpawnLocation());
+            }
         }
     }
 
@@ -341,17 +348,13 @@ class Arena
         {
             if(!$sender->isOnline()) 
             {
-                $this->sendMessage("§7[§c-§7] {$sender->getName()}");
-                unset($this->players[$sender->getName()]);
-                unset($this->percents[$sender->getName()]);
+                $this->LeavePlayer($sender);
                 continue;
             }
 
             if($sender->getWorld() != ($this->state == self::state_lobby ? $this->lobby_world : $this->game_world)) 
             {
-                $this->sendMessage("§7[§c-§7] {$sender->getName()}");
-                unset($this->players[$sender->getName()]);
-                unset($this->percents[$sender->getName()]);
+                $this->LeavePlayer($sender);
                 continue;
             }
         }
@@ -433,7 +436,6 @@ class Arena
         foreach($this->players + $this->spectators as $player) 
         {
             $player->getInventory()->clearAll();
-            $player->getInventory()->clearAll();
 
             $team = $this->teams->GetTeam($player);
 
@@ -441,8 +443,11 @@ class Arena
             {
                 $vec = BedWars::StringToVec($this->data["spectator"]);
                 $player->teleport(new Position($vec->x, $vec->y, $vec->z, $this->game_world));
+                $player->setGamemode(GameMode::SPECTATOR());
                 continue; 
             }
+
+            $player->setGamemode(GameMode::ADVENTURE());
 
             $vec = BedWars::StringToVec($this->data["teamspawn"][$team->id]);
             $player->teleport(new Position($vec->x, $vec->y, $vec->z, $this->game_world));
@@ -459,6 +464,7 @@ class Arena
 
         foreach($this->players as $player) 
         {
+            $player->setGamemode(GameMode::SURVIVAL());
             $team = $this->teams->GetTeam($player);
             $player->sendTitle(Lang::format("start_title", ["{team}"], [$team->display]), Lang::format("start_subtitle", ["{players}"], [join(", ", $team->List())]));
             $player->sendMessage(Lang::format("start_team_info", ["{players}"], [join(", ", $team->List())]));
