@@ -88,6 +88,24 @@ class ArenaTask extends Task
                     ]));
                 }
 
+                foreach($this->arena->toRespawn as $respawn) 
+                {
+                    $time = $respawn[1];
+                    /** @var Player */
+                    $player = $respawn[0];
+                    
+                    $this->arena->toRespawn[$player->getName()][1]--;
+
+                    if($time - 1 == 0) 
+                    {
+                        $player->sendTitle(Lang::get("respawned"), "", -1, 10, 5);
+                        $this->arena->Respawn($player);
+                        continue;
+                    }
+
+                    $player->sendTitle(Lang::format("respawn_title", ["{time}"], [$time - 1]));
+                }
+
                 if($this->arena->gameTime == 0) 
                 {
                     $this->arena->endGame();

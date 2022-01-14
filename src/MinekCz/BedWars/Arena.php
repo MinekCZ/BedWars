@@ -50,6 +50,9 @@ class Arena
     public array $spectators = [];
 
 
+    public array $toRespawn = [];
+
+
     //Time::
     public int $gameTime;
     public int $lobbyTime;
@@ -238,26 +241,98 @@ class Arena
         $this->teams->JoinTeam($player);
     }
 
-    public function KillPlayer(Player $player, Player $by = null) 
-    {   
-        if($by != null) 
+    public function KillPlayer(Player $player, Player $by = null, bool $tp = false) 
+    {
+        $pteam = $this->teams->GetTeam($player);
+        
+        if($pteam->bed) 
         {
+            if($by != null) 
+            {
+    
+                $player->sendMessage(Lang::format("killed_by", 
+                    ["{team}", "{player}"], 
+                    [
+                    $this->GetTeamPretty($by),
+                    $by->getName()
+                ]));
+    
+            } else 
+            {
+                $player->sendMessage(Lang::get("killed"));
+            }
 
-            //$player->sendMessage(Lang::format("killed_by_now_spectator", 
-            //    ["{role}"], 
-            //    [
-            //    $this->GetRolePretty($by)
-            //]));
+            $this->ToRespawn($player, $by, $tp);
+            
 
         } else 
         {
-            $player->sendMessage(Lang::get("killed_now_spectator"));
+            if($by != null) 
+            {
+    
+                $player->sendMessage(Lang::format("killed_by_now_spectator", 
+                    ["{team}", "{player}"], 
+                    [
+                    $this->GetTeamPretty($by),
+                    $by->getName()
+                ]));
+    
+            } else 
+            {
+                $player->sendMessage(Lang::get("killed_now_spectator"));
+            }
+
+
+            $this->JoinSpectator($player);
         }
+
+
+
+        
 
         //$this->JoinSpectator($player);
 
 
         $this->CheckPlayers();
+    }
+
+    public function ToRespawn(Player $player, Player $damager = null, bool $tp = false) 
+    {
+        $player->setGamemode(GameMode::SPECTATOR());
+        $player->setHealth(20);
+        $player->getHungerManager()->setFood(20);
+        $player->getInventory()->clearAll();
+
+        if($tp) 
+        {
+            if($damager != null) 
+            {
+                $player->teleport($damager->getPosition());
+            } else 
+            {
+                $vec = BedWars::StringToVec($this->data["spectator"]);
+                $player->teleport(new Position($vec->x, $vec->y, $vec->z, $this->game_world));
+            }
+        }
+
+        $this->toRespawn[$player->getName()] = [$player, 10];
+    }
+
+    public function Respawn(Player $player) 
+    {
+        $player->setGamemode(GameMode::SURVIVAL());
+        $player->setHealth(20);
+        $player->getHungerManager()->setFood(20);
+        $player->getInventory()->clearAll();
+
+
+        $team = $this->teams->GetTeam($player);
+        $vec = BedWars::StringToVec($this->data["teamspawn"][$team->id]);
+        $player->teleport(new Position($vec->x, $vec->y, $vec->z, $this->game_world));
+
+
+
+        unset($this->toRespawn[$player->getName()]);
     }
 
     public function CheckPlayers() 
@@ -360,7 +435,16 @@ class Arena
             $player->getInventory()->clearAll();
             $player->getInventory()->clearAll();
 
-            $vec = BedWars::StringToVec($this->data["teamspawn"][$this->teams->GetTeam($player)->id]);
+            $team = $this->teams->GetTeam($player);
+
+            if($team == null) 
+            {
+                $vec = BedWars::StringToVec($this->data["spectator"]);
+                $player->teleport(new Position($vec->x, $vec->y, $vec->z, $this->game_world));
+                continue; 
+            }
+
+            $vec = BedWars::StringToVec($this->data["teamspawn"][$team->id]);
             $player->teleport(new Position($vec->x, $vec->y, $vec->z, $this->game_world));
         }
 
@@ -385,10 +469,33 @@ class Arena
     {
         $this->state = self::state_ending;
 
+        $teams = $this->teams->GetAliveTeams();
+
+        if(count($teams) == 1) 
+        {
+            $team = $teams[array_key_first($teams)];
+
+            $this->sendTitle(Lang::format("win_title", ["{team}"], [$team->display]));
+            $this->sendMessage(Lang::get("prefix"));
+            $this->sendMessage(Lang::format("win_info_msg", ["{team}"], [$team->display]));
+        } else 
+        {
+            $this->sendTitle(Lang::get("win_draw_title"));
+
+            $this->sendMessage(Lang::get("prefix"));
+            $this->sendMessage(Lang::get("win_draw_msg"));
+        }
+
+        foreach($this->teams->teams as $team) 
+        {
+            $this->sendMessage(Lang::format("win_info_players", ["{team}", "{players}"], [$team->display, join(", ", $team->List())]));
+        }
+
         foreach($this->players as $player) 
         {
             $this->JoinSpectator($player);
         }
+
     }
 
     public function finalEnd() 

@@ -24,14 +24,16 @@ use pocketmine\player\Player;
 class ArenaListener implements Listener
 {
 
-    public Arena       $arena;
-    public BedWars $BedWars;
+    public Arena $arena;
+    public BedWars $bedwars;
+
+    public array $lastDamage = [];
 
 
-    public function __construct(BedWars $BedWars, Arena $arena)
+    public function __construct(BedWars $bedWars, Arena $arena)
     {
         $this->arena       = $arena;
-        $this->BedWars = $BedWars;
+        $this->bedwars     = $bedWars;
     }
 
 
@@ -43,51 +45,64 @@ class ArenaListener implements Listener
         if(!$player instanceof Player) return;
         if(!$this->arena->IsInArena($player)) return;
 
-
-        if($damager instanceof Player) 
+        if($this->arena->state != Arena::state_game) 
         {
-            //Murder::
-            if($damager == $this->arena->murder) 
-            {
-                if($damager->getInventory()->getItemInHand()->getId() != ItemIds::IRON_SWORD) 
-                {
-                    $event->cancel();
-                    return;
-                }
-
-                $this->arena->KillPlayer($player, $damager);
-                return;
-            }
-
-            if($damager != $this->arena->murder) 
-            {
-                if($event->getCause() != EntityDamageByEntityEvent::CAUSE_PROJECTILE) 
-                {
-                    $event->cancel();
-                    return;
-                }
-                $role = $this->arena->GetRole($player);
-
-                
-                $this->arena->KillPlayer($player, $damager);
-
-                if($role != "Murder") 
-                {
-                    $this->arena->KillPlayer($damager, null);
-                }
-                $this->arena->CheckPlayers();
-                return;
-            }
-            
+            $event->cancel();
+            return;
         }
 
-        $event->cancel();
+        if($this->arena->teams->GetTeam($player) == $this->arena->teams->GetTeam($damager)) 
+        {
+            $event->cancel();
+            return;
+        }
+
+        if($player->getHealth() <= $event->getFinalDamage()) 
+        {
+            $event->cancel();
+            $this->arena->KillPlayer($player, $damager, $event->getCause() == EntityDamageByEntityEvent::CAUSE_PROJECTILE);
+            return;
+        }
+
+        $this->lastDamage[$player->getName()] = [$damager, $this->arena->gameTime];
     }
 
     public function EntityDamage(EntityDamageEvent $event) 
     {
-        if(!$event->getEntity() instanceof Player) return;
-        if($this->arena->IsInArena($event->getEntity())) $event->cancel();
+        $player  = $event->getEntity();
+
+        if(!$player instanceof Player) return;
+        if(!$this->arena->IsInArena($player)) return;
+        if($this->arena->state != Arena::state_game) 
+        {
+            $event->cancel();
+            return;
+        }
+        
+        if($player->getHealth() <= $event->getFinalDamage()) 
+        {
+            $event->cancel();
+
+            if(isset($this->lastDamage[$player->getName()])) 
+            {
+                $a = $this->lastDamage[$player->getName()];
+                /** @var Player */
+                $damager = $a[0];
+                $time = $a[1];
+
+
+                if($time - $this->arena->gameTime < 30) 
+                {
+                    $this->arena->KillPlayer($player, $damager, true);
+                    unset($this->lastDamage[$player->getName()]);
+                    return;
+                }
+            }
+            $this->arena->KillPlayer($player, null, $event->getCause() == EntityDamageEvent::CAUSE_VOID);
+            return;
+        }
+
+
     }
 
     public function ProjectileHitBlock(ProjectileHitBlockEvent $event) 
@@ -100,126 +115,29 @@ class ArenaListener implements Listener
         if($this->arena->IsInArena($event->getEntity()->getOwningEntity())) $event->getEntity()->flagForDespawn();
     }
 
-    public function ProjectileCreate(ProjectileLaunchEvent $event) 
-    {
-        $entity = $event->getEntity()->getOwningEntity();
-
-        if($this->arena->IsInArena($entity) && $entity == $this->arena->sherif) 
-        {
-            $this->arena->sherifBow = 8;
-        }
-    }
-
     public function BlockBreak(BlockBreakEvent $event)  
     {
-        if($this->arena->IsInArena($event->getPlayer())) $event->cancel();
+        if(!$this->arena->IsInArena($event->getPlayer())) return;
     }
 
     public function BlockPlace(BlockPlaceEvent $event) 
     {
-        if($this->arena->IsInArena($event->getPlayer())) $event->cancel();
+        if(!$this->arena->IsInArena($event->getPlayer())) return;
     }
 
     public function Hunger(PlayerExhaustEvent $event) 
     {
-        if($this->arena->IsInArena($event->getPlayer())) $event->cancel();
+        if(!$this->arena->IsInArena($event->getPlayer())) return;
     }
 
     public function OnDrop(PlayerDropItemEvent $event) 
     {
-        if($this->arena->IsInArena($event->getPlayer())) $event->cancel();
+        if(!$this->arena->IsInArena($event->getPlayer())) return;
     }
 
-    public function OnPickUp(EntityItemPickupEvent $event) 
-    {
-        $entity = $event->getEntity();
-        $item =   $event->getItem();
-
-        if(!$entity instanceof Player) return;
-        if(!$this->arena->IsInArena($entity)) return;
-
-        if($entity == $this->arena->murder || $entity == $this->arena->sherif) 
-        {
-            $event->cancel();
-            return;
-        }
-
-        if($item->getId() != ItemIds::BOW) 
-        {
-            $event->cancel();
-            return;
-        }
-
-        if($this->arena->sherif != null) 
-        {
-            $event->cancel();
-            return;
-        }
-
-        foreach($this->arena->game_world->getEntities() as $ii) 
-        {
-            if($ii instanceof ItemEntity) 
-            {
-                $ii->flagForDespawn();
-            }
-        }
-
-
-        $this->arena->sherif = $entity;
-        $this->arena->sherifBow = 1;
-        $event->cancel();
-
-    }
-
-
-    //Chest interact::
     public function OnInteract(PlayerInteractEvent $event) 
     {
         if(!$this->arena->IsInArena($event->getPlayer())) return;
         $player = $event->getPlayer();
-
-        if($event->getBlock()->getId() == BlockLegacyIds::CHEST) 
-        {
-            $event->cancel();
-            $player->getInventory()->addItem($this->arena->GetItem(ItemIds::GOLD_INGOT, 0, 1, Lang::get("item_ingot")));
-            $block = $this->arena->GetBlock(BlockLegacyIds::AIR, 0);
-            $this->arena->game_world->setBlock($event->getBlock()->getPosition(), $block, true);
-            return;
-        }
-
-        if($event->getItem()->getId() == ItemIds::GOLD_INGOT) 
-        {
-            $item = $event->getItem();
-
-            if($item->getCount() >= $this->arena->data["arrow_price"]) 
-            {
-
-                if($player == $this->arena->murder) 
-                {
-                    $player->sendMessage(Lang::get("item_cannot_use"));
-                    $event->cancel();
-                    return;
-                }
-
-
-                $item->setCount($item->getCount() - $this->arena->data["arrow_price"]);
-                if($item->getCount() > 0) 
-                {
-                    $player->getInventory()->setItemInHand($item);
-                } else 
-                {
-                    $player->getInventory()->setItemInHand(ItemFactory::air()); 
-                }
-
-                
-                $event->cancel();
-
-                $player->getInventory()->addItem($this->arena->GetItem(ItemIds::ARROW, 0, 1, Lang::get("item_arrow")));
-
-                $player->sendMessage(Lang::get("item_bought_arrow"));
-
-                return;
-            }
-        }
     }
 }

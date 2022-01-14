@@ -1,4 +1,4 @@
-prefix: "§cPalermo§7Town"
+prefix: "§cBedWars"
 
 waiting_player: "§7Waiting for players..."
 lobby_starting_tip: "§7Team: {team}§7 | Time: §a{time}"
@@ -31,9 +31,15 @@ item_bought        : "§6> §7You have bought {item}"
 
 
 win_title: "{team} Won!"
-win_info_msg : "\n§7Won: {team}\n§7---"
+win_info_msg : "§7Won: {team}\n§7---"
+win_info_players: "{team}§7 {players}"
 
-win_info_players: "{team}§7: {players}"
+win_draw_title: "§7Draw!"
+win_draw_msg: "§7Won: §7Draw"
+
+
+respawn_title: "§7Respawn in §c{time}"
+respawned: "§cRespawned!"
 
 
 

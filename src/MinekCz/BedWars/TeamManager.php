@@ -26,18 +26,35 @@ class TeamManager
 
     public function JoinTeam(Player $player) 
     {
-        $need = (int)(count($this->arena->players) / $this->ppt);
+        $count = count($this->teams);
+        $keys = array_keys($this->teams);
+        $pcount = count($this->arena->players) - 1;
+
+        $offset = $pcount - ($count * (int)($pcount / $count));
+
+        $team = $this->teams[$keys[$offset]];
+
+        $team->players[$player->getName()] = $player;
+
+        $team->bed = true;
+        $team->alive = true;
+    }
+
+    /** @return Team[] */
+    public function GetAliveTeams() :array
+    {
+        $final = [];
+
 
         foreach($this->teams as $team) 
         {
-            if(count($team->players) <= $need) 
+            if($team->alive) 
             {
-                $team->players[$player->getName()] = $player;
-                
-                $player->sendMessage(Lang::format("join_team", ["{team}"], [$team->display]));
-                return;
+                $final[$team->id] = $team;
             }
         }
+
+        return $final;
     }
 
     public function LeaveTeam(Player $player) 
@@ -69,6 +86,9 @@ class Team
     public string $id = "";
     public string $display = "";
     public string $color = "";
+
+    public bool $alive = false;
+    public bool $bed = false;
 
     public function __construct(array $player, string $id, string $display)
     {
