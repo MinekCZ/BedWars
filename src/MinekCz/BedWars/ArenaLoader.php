@@ -2,6 +2,7 @@
 
 namespace MinekCz\BedWars;
 
+use pocketmine\player\Player;
 use pocketmine\utils\Config;
 
 class ArenaLoader 
@@ -32,6 +33,37 @@ class ArenaLoader
         $final["enabled"]     = "false";
 
         return $final;
+    }
+
+    public static function CheckData(Player $player, array $data) 
+    {
+
+        $miss = 0;
+
+        foreach(self::GetBasicData("check") as $key => $f) 
+        {
+            if(!isset($data[$key])) { $player->sendMessage("§7- Key §c\"{$key}\" §7is §ccorrupted/missing§7! Please fix file or create new arena"); $miss++;  }
+        }
+        
+        foreach($data as $key => $d) 
+        {
+            if(empty($d) || $d == null || $d == "") 
+            {
+
+                $player->sendMessage("§c- Key \"{$key}\" is empty! Please setup it's data");
+
+                $miss++;
+
+            }
+        }
+
+        if($miss > 0) 
+        {
+
+            $player->sendMessage("§7---");
+            $player->sendMessage("§7There are §c{$miss} mistakes! §7Fix all of them and \"/pt savedata\" again.");
+
+        }
     }
 
     public static function LoadArenas() :array

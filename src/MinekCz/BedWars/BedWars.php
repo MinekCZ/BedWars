@@ -247,8 +247,8 @@ class BedWars extends PluginBase
             @mkdir($this->getDataFolder() . "data");
         }
 
-        if(!is_dir($this->getDataFolder() . "data\\saves")) {
-            @mkdir($this->getDataFolder() . "data\\saves");
+        if(!is_dir($this->getDataFolder() . "data" . DIRECTORY_SEPARATOR . "saves")) {
+            @mkdir($this->getDataFolder() . "data" . DIRECTORY_SEPARATOR . "saves");
         }
 
         if($this->debug) 
@@ -286,11 +286,16 @@ class BedWars extends PluginBase
 
         $level->save(true);
 
-        $levelPath = $this->getServer()->getDataPath() . "worlds" . DIRECTORY_SEPARATOR . $level->getFolderName();
-        $target = $this->getDataFolder() . "data\\saves" . DIRECTORY_SEPARATOR . $level->getFolderName();
+        $fname = $level->getFolderName();
+
+        $levelPath = $this->getServer()->getDataPath() . "worlds"  . DIRECTORY_SEPARATOR  . $level->getFolderName();
+        $target = $this->getDataFolder() . "data" . DIRECTORY_SEPARATOR . "saves"  . DIRECTORY_SEPARATOR  . $level->getFolderName();
 
         $this->getServer()->getWorldManager()->unloadWorld($level);
 
+        
+        
+        
         
         if(!is_dir($target)) {
             @mkdir($target);
@@ -304,22 +309,19 @@ class BedWars extends PluginBase
             if($file->isDir()) 
             {
                 $localPath = substr($file->getPath(), strlen($this->getServer()->getDataPath() . "worlds"));
+                $localPath = substr($localPath, strlen($fname)+1);
 
 
-                if(!is_dir($target . "\.." . $localPath)) {
-                    @mkdir($target . "\.." . $localPath);
+                if(!is_dir($target . $localPath)) {
+                    @mkdir($target . $localPath);
                 }
                 
             }
 
             if($file->isFile()) 
             {
-                $filePath = $file->getPath() . DIRECTORY_SEPARATOR . $file->getBasename();
-                $localPath = substr($file->getPath(), strlen($this->getServer()->getDataPath() . "worlds\\" . $level->getFolderName()));
-
-                //var_dump($localPath . DIRECTORY_SEPARATOR . $file->getFilename());
-
-                //var_dump($target . $localPath . "\\" . $file->getFilename());
+                $filePath = $file->getPath()  . DIRECTORY_SEPARATOR  . $file->getBasename();
+                $localPath = substr($file->getPath(), strlen($this->getServer()->getDataPath() . "worlds" . DIRECTORY_SEPARATOR  . $level->getFolderName()));
                 $ex = $file->getExtension();
                 $name = $file->getFilename();
                 if($ex == "log" || $name == "LOCK" || $name == "LOG") 
@@ -328,7 +330,11 @@ class BedWars extends PluginBase
                 }
                 var_dump($file->getFilename());
 
-                copy($filePath, $target . $localPath . "\\" . $file->getFilename());
+                if(!is_file($filePath)) {
+                    continue;
+                }
+
+                copy($filePath, $target . $localPath  . DIRECTORY_SEPARATOR  . $file->getFilename());
             }
 
         }
@@ -338,8 +344,11 @@ class BedWars extends PluginBase
 
     public function loadMap(string $folderName) :bool
     {
-
-        if(!$this->getServer()->getWorldManager()->isWorldGenerated($folderName)) return false;
+        if(!$this->getServer()->getWorldManager()->isWorldGenerated($folderName)) 
+        {
+            $this->getLogger()->error("Level \"{$folderName}\" was not found in server data!");
+            return false;
+        }
 
         if($this->getServer()->getWorldManager()->isWorldLoaded($folderName)) 
         {
@@ -348,18 +357,19 @@ class BedWars extends PluginBase
 
 
 
-        $levelpath = $this->getDataFolder() . "data\\saves\\" . $folderName;
+        $levelpath = $this->getDataFolder() . "data" . DIRECTORY_SEPARATOR . "saves" . DIRECTORY_SEPARATOR  . $folderName;
 
         if(!is_dir($levelpath)) 
         {
-            $this->getLogger()->error("Could not load map \"$folderName\". File was not found, try save level in setup");
+            $this->getLogger()->error("Level \"{$folderName}\" was not found in game data!");
+            return false;
         }
 
-        $target = $this->getServer()->getDataPath() . "worlds\\" . $folderName;
+        $target = $this->getServer()->getDataPath() . "worlds" . DIRECTORY_SEPARATOR  . $folderName;
 
-        array_map('unlink', glob("$target\\db/*.*"));
-        array_map('unlink', glob("$target\\db/*"));
-        rmdir($target . "\\db");
+        array_map('unlink', glob("$target" . DIRECTORY_SEPARATOR . "db" . DIRECTORY_SEPARATOR ."*.*"));
+        array_map('unlink', glob("$target" . DIRECTORY_SEPARATOR . "db". DIRECTORY_SEPARATOR ."*"));
+        rmdir($target  . DIRECTORY_SEPARATOR . "db");
 
         $files = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator(realpath($levelpath)), \RecursiveIteratorIterator::LEAVES_ONLY);
 
@@ -371,11 +381,11 @@ class BedWars extends PluginBase
             
             if($file->isDir()) 
             {
-                $localPath = substr($file->getPath(), strlen($this->getDataFolder() . "data\\saves"));
+                $localPath = substr($file->getPath(), strlen($this->getDataFolder() . "data" . DIRECTORY_SEPARATOR . "saves"));
 
 
-                if(!is_dir($target . "\.." . $localPath)) {
-                    @mkdir($target . "\.." . $localPath);
+                if(!is_dir($target . DIRECTORY_SEPARATOR . ".." . $localPath)) {
+                    @mkdir($target . DIRECTORY_SEPARATOR . ".." . $localPath);
                 }
                 
             }
@@ -383,7 +393,7 @@ class BedWars extends PluginBase
             if($file->isFile()) 
             {
                 $filePath = $file->getPath() . DIRECTORY_SEPARATOR . $file->getBasename();
-                $localPath = substr($file->getPath(), strlen($this->getDataFolder() . "data\\saves\\" . $folderName));
+                $localPath = substr($file->getPath(), strlen($this->getDataFolder() . "data" . DIRECTORY_SEPARATOR . "saves" . DIRECTORY_SEPARATOR  . $folderName));
 
                 $ex = $file->getExtension();
                 $name = $file->getFilename();
@@ -392,7 +402,7 @@ class BedWars extends PluginBase
                     continue;
                 }
 
-                copy($filePath, $target . $localPath . "\\" . $file->getFilename());
+                copy($filePath, $target . $localPath  . DIRECTORY_SEPARATOR  . $file->getFilename());
             }
 
         }

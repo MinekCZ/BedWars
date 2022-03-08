@@ -131,6 +131,12 @@ class Commands extends Command
                     $arena->JoinPlayer($sender);
                 }
                 break;
+
+            case "shop":
+
+                Shop::Use($sender, "");
+
+                break;
             case "leave":
                 if(!$sender instanceof Player) { $sender->sendMessage("§cNot Available in console!"); return; }
 
@@ -435,11 +441,15 @@ class Commands extends Command
                 }
             case "savedata":
 
-                $config = new Config($this->getDataFolder() . "data\\" . $this->data["id"] . ".yml", Config::YAML);
+                $config = new Config($this->getDataFolder() . "data". DIRECTORY_SEPARATOR . $this->data["id"] . ".yml", Config::YAML);
                 $config->setAll($this->data);
                 $config->save();
 
                 $sender->sendMessage("§7Arena §adata §7has been successfully §asaved");
+                $sender->sendMessage("§7§oMake sure to §csave level§7 \"/pt savelevel\"");
+
+                ArenaLoader::CheckData($sender, $this->data);
+
                 break;
 
             case "savelevel":
