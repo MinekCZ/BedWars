@@ -22,6 +22,9 @@ killed: "§7You're death."
 game_starting_soon: "\n§7> Game is starting soon!"
 game_started:       "\n§7> Game has started!"
 
+
+bed_destroy: "\n§7Team {team} §7destroyed {teamBed}§7's bed!"
+
 item_gold         : "§6§oGold"
 item_bronze       : "§c§oBronze"
 item_iron         : "§7§oIron"

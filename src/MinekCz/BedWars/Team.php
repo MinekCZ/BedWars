@@ -13,6 +13,7 @@ class Team
     public string $color = "";
 
     public bool $alive = false;
+    public int $alive_p = 0;
     public bool $bed = false;
 
     public function __construct(array $player, string $id, string $display)

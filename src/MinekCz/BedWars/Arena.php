@@ -214,7 +214,7 @@ class Arena
 
     public function IsInArena(Player $player) : bool 
     {
-        return isset($this->players[$player->getName()]);
+        return isset($this->players[$player->getName()]) || isset($this->spectators[$player->getName()]);
     }
 
 
@@ -289,6 +289,16 @@ class Arena
                 $player->sendMessage(Lang::get("killed_now_spectator"));
             }
 
+            $team = $this->teams->GetTeam($player);
+
+            if($team != null) 
+            {
+                $team->alive_p--;
+
+                if($team->alive_p <= 0) {
+                    $team->alive = false;
+                }
+            }
 
             $this->JoinSpectator($player);
         }
@@ -388,8 +398,16 @@ class Arena
             $this->reset();
         }
 
+        
+
 
         if($this->state != self::state_game) return;
+
+        if(count($this->teams->GetAliveTeams()) <= 1) 
+        {
+            $this->endGame();
+            return;
+        }
 
         if(count($this->players) == 1) 
         {
@@ -409,12 +427,19 @@ class Arena
         $player->getInventory()->clearAll();
 
         if(isset($this->players[$player->getName()])) unset($this->players[$player->getName()]);
+
+        //$this->teams->CheckTeams();
+        $this->CheckPlayers();
     }
 
 
-    public function GetTeamPretty(Player $player) :string
+    public function GetTeamPretty(Player|string $value) :string
     {
-        $team = $this->teams->GetTeam($player);
+        if(is_string($value)) 
+        {
+            return $this->teams->teams[$value]->display;
+        }
+        $team = $this->teams->GetTeam($value);
 
         return $team != null ? $team->display : Lang::get("spectator");
     }
@@ -426,6 +451,23 @@ class Arena
         return $team != null ? $team->id : "spectator";
     }
 
+
+    public function DestroyBed(Player $player, string $team) :bool
+    {
+        $pteam = $this->teams->GetTeam($player);
+
+        if($team == $pteam->id) 
+        {
+            return false;
+        }
+
+        $this->teams->teams[$team]->bed = false;
+
+        $this->sendMessage(Lang::format("bed_destroy", ["{team}", "{teamBed}"], [$pteam->display, $this->GetTeamPretty($team)]));
+
+
+        return true;
+    }
 
 
 

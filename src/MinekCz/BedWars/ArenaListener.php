@@ -20,6 +20,7 @@ use pocketmine\event\player\PlayerInteractEvent;
 use pocketmine\item\ItemFactory;
 use pocketmine\item\ItemIds;
 use pocketmine\player\Player;
+use pocketmine\world\Position;
 
 class ArenaListener implements Listener
 {
@@ -51,6 +52,8 @@ class ArenaListener implements Listener
             return;
         }
 
+        
+
         if($this->arena->teams->GetTeam($player) == $this->arena->teams->GetTeam($damager)) 
         {
             $event->cancel();
@@ -76,8 +79,15 @@ class ArenaListener implements Listener
         if($this->arena->state != Arena::state_game) 
         {
             $event->cancel();
+            if($event->getCause() == EntityDamageEvent::CAUSE_VOID) 
+            {
+                $vec = BedWars::StringToVec($this->arena->data["spectator"]);
+                $player->teleport(new Position($vec->x, $vec->y, $vec->z, $this->arena->game_world));
+            }
             return;
         }
+
+        
         
         if($player->getHealth() <= $event->getFinalDamage()) 
         {
@@ -118,6 +128,26 @@ class ArenaListener implements Listener
     public function BlockBreak(BlockBreakEvent $event)  
     {
         if(!$this->arena->IsInArena($event->getPlayer())) return;
+
+        $block = BedWars::VecToString($event->getBlock()->getPosition());
+        $player = $event->getPlayer();
+
+        if($event->getBlock()->getId() == BlockLegacyIds::BED_BLOCK) 
+        {
+            foreach($this->arena->data["teambed"] as $k => $pos) 
+            {
+                if($block == $pos) 
+                {
+                    
+                    $player->sendMessage("Zničil si postel: " . $k);
+                    $bool = $this->arena->DestroyBed($player, $k);
+
+                    if(!$bool) { $event->cancel(); }
+    
+                    break;
+                }
+            }
+        }
     }
 
     public function BlockPlace(BlockPlaceEvent $event) 

@@ -39,6 +39,7 @@ class TeamManager
 
         $team->bed = true;
         $team->alive = true;
+        $team->alive_p++;
 
         $player->sendMessage(Lang::format("join_team", ["{team}"], [$team->display]));
     }
@@ -73,8 +74,6 @@ class TeamManager
         if($team == null) return;
 
         unset($team->players[$player->getName()]);
-
-        var_dump($player->getName());
     }
 
     public function GetTeam(Player $player) :?Team
@@ -88,5 +87,10 @@ class TeamManager
         }
 
         return null;
+    }
+
+
+    public function CheckTeams() 
+    {
     }
 }
