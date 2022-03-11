@@ -68,7 +68,7 @@ class ArenaLoader
 
     public static function LoadArenas() :array
     {
-        $files = glob(BedWars::$bedwars->getDataFolder() . "data\\" . "*.yml");
+        $files = glob(BedWars::$bedwars->getDataFolder() . "data" . DIRECTORY_SEPARATOR . "*.yml");
         $final = [];
         foreach ($files as $file) 
         {

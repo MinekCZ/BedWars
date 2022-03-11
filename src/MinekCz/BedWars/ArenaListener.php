@@ -200,6 +200,7 @@ class ArenaListener implements Listener
         }
     }
 
+    /*
     public function OnVillagerMove(EntityMotionEvent $event) 
     {
         return;
@@ -208,4 +209,5 @@ class ArenaListener implements Listener
         if(!$entity instanceof Villager) { return; }
         if($entity->getWorld() != $this->arena->game_world) { return; }
     }
+    */
 }

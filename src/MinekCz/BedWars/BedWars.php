@@ -290,11 +290,11 @@ class BedWars extends PluginBase
         return "{$loc->x},{$loc->y},{$loc->z},{$loc->pitch},{$loc->pitch}";
     }
 
-    public static function StringToLoc(string $str, ?World $world = null) : Location 
+    public static function StringToLoc(string $str, ?World $world = null) : ?Location 
     {
         $split = explode(",", $str);
 
-        if(count($split) != 5) return Location::zero();
+        if(count($split) != 5) return null;
 
         return new Location($split[0], $split[1], $split[2], $world, $split[4], $split[3]);
     }
