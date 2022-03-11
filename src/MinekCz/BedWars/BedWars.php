@@ -2,6 +2,7 @@
 
 namespace MinekCz\BedWars;
 
+use pocketmine\entity\Location;
 use pocketmine\math\Vector3;
 use pocketmine\player\Player;
 use pocketmine\plugin\PluginBase;
@@ -37,6 +38,9 @@ class BedWars extends PluginBase
         $this->saveResource("lang.yml");
         $lang = new Config($this->getDataFolder() . "lang.yml", Config::YAML);
         Lang::$lang = $lang->getAll();
+
+        $shop = new Config($this->getDataFolder(). "shop.yml", Config::DETECT, Shop::GetData());
+        Shop::$data = $shop->getAll();
 
         if($this->debug) 
         {
@@ -253,7 +257,8 @@ class BedWars extends PluginBase
 
         if($this->debug) 
         {
-            unlink($this->getDataFolder() . "lang.yml");
+            if(is_file($this->getDataFolder() . "lang.yml")) { unlink($this->getDataFolder() . "lang.yml"); }
+            if(is_file($this->getDataFolder() . "shop.yml")) { unlink($this->getDataFolder() . "shop.yml"); }
         }
 
         
@@ -278,6 +283,20 @@ class BedWars extends PluginBase
         if(count($split) != 3) return Vector3::zero();
 
         return new Vector3($split[0], $split[1], $split[2]);
+    }
+
+    public static function LocToString(Location $loc) : string 
+    {
+        return "{$loc->x},{$loc->y},{$loc->z},{$loc->pitch},{$loc->pitch}";
+    }
+
+    public static function StringToLoc(string $str, ?World $world = null) : Location 
+    {
+        $split = explode(",", $str);
+
+        if(count($split) != 5) return Location::zero();
+
+        return new Location($split[0], $split[1], $split[2], $world, $split[4], $split[3]);
     }
 
 

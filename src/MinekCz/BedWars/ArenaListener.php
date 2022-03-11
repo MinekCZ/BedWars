@@ -5,11 +5,13 @@ namespace MinekCz\BedWars;
 
 use pocketmine\block\BlockLegacyIds;
 use pocketmine\entity\object\ItemEntity;
+use pocketmine\entity\Villager;
 use pocketmine\event\block\BlockBreakEvent;
 use pocketmine\event\block\BlockPlaceEvent;
 use pocketmine\event\entity\EntityDamageByEntityEvent;
 use pocketmine\event\entity\EntityDamageEvent;
 use pocketmine\event\entity\EntityItemPickupEvent;
+use pocketmine\event\entity\EntityMotionEvent;
 use pocketmine\event\entity\ProjectileHitBlockEvent;
 use pocketmine\event\entity\ProjectileHitEvent;
 use pocketmine\event\entity\ProjectileLaunchEvent;
@@ -17,6 +19,7 @@ use pocketmine\event\Listener;
 use pocketmine\event\player\PlayerDropItemEvent;
 use pocketmine\event\player\PlayerExhaustEvent;
 use pocketmine\event\player\PlayerInteractEvent;
+use pocketmine\inventory\PlayerCraftingInventory;
 use pocketmine\item\ItemFactory;
 use pocketmine\item\ItemIds;
 use pocketmine\player\Player;
@@ -42,6 +45,19 @@ class ArenaListener implements Listener
     {
         $damager = $event->getDamager();
         $player  = $event->getEntity();
+
+        if($player instanceof Villager) 
+        {
+            if(!$damager instanceof Player) { return; }
+            if($damager->getWorld() != $this->arena->game_world) { return; }
+            if(!$this->arena->IsInArena($damager)) { return; }
+            
+            Shop::Use($damager);
+
+            $event->cancel();
+
+            return;
+        }
 
         if(!$player instanceof Player) return;
         if(!$this->arena->IsInArena($player)) return;
@@ -74,6 +90,15 @@ class ArenaListener implements Listener
     {
         $player  = $event->getEntity();
 
+        if($player instanceof Villager) 
+        {
+            if($player->getWorld() != $this->arena->game_world) { return; };
+
+            $event->cancel();
+
+            return;
+        }
+
         if(!$player instanceof Player) return;
         if(!$this->arena->IsInArena($player)) return;
         if($this->arena->state != Arena::state_game) 
@@ -81,8 +106,7 @@ class ArenaListener implements Listener
             $event->cancel();
             if($event->getCause() == EntityDamageEvent::CAUSE_VOID) 
             {
-                $vec = BedWars::StringToVec($this->arena->data["spectator"]);
-                $player->teleport(new Position($vec->x, $vec->y, $vec->z, $this->arena->game_world));
+                $this->arena->Respawn($player);
             }
             return;
         }
@@ -131,22 +155,23 @@ class ArenaListener implements Listener
 
         $block = BedWars::VecToString($event->getBlock()->getPosition());
         $player = $event->getPlayer();
-
+        
+        
         if($event->getBlock()->getId() == BlockLegacyIds::BED_BLOCK) 
         {
+            $breakBed = false;
             foreach($this->arena->data["teambed"] as $k => $pos) 
             {
                 if($block == $pos) 
                 {
-                    
-                    $player->sendMessage("Zničil si postel: " . $k);
                     $bool = $this->arena->DestroyBed($player, $k);
 
-                    if(!$bool) { $event->cancel(); }
-    
-                    break;
+                    if($bool) { $breakBed = true; }
                 }
+
             }
+
+            if(!$breakBed) { $event->cancel(); }
         }
     }
 
@@ -168,6 +193,19 @@ class ArenaListener implements Listener
     public function OnInteract(PlayerInteractEvent $event) 
     {
         if(!$this->arena->IsInArena($event->getPlayer())) return;
-        $player = $event->getPlayer();
+
+        if($event->getBlock()->getId() == BlockLegacyIds::CRAFTING_TABLE) 
+        {
+            $event->cancel();
+        }
+    }
+
+    public function OnVillagerMove(EntityMotionEvent $event) 
+    {
+        return;
+        $entity = $event->getEntity();
+
+        if(!$entity instanceof Villager) { return; }
+        if($entity->getWorld() != $this->arena->game_world) { return; }
     }
 }

@@ -7,9 +7,13 @@ use Exception;
 use pocketmine\block\Block;
 use pocketmine\block\BlockFactory;
 use pocketmine\block\BlockLegacyIds;
+use pocketmine\entity\Entity;
+use pocketmine\entity\Location;
+use pocketmine\entity\Villager;
 use pocketmine\item\Item;
 use pocketmine\item\ItemFactory;
 use pocketmine\item\ItemIds;
+use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\player\GameMode;
 use pocketmine\player\Player;
 use pocketmine\Server;
@@ -20,6 +24,12 @@ class Arena
 {
     //consts::
     public const state_none = -1, state_lobby = 0, state_pregame = 1, state_game = 2, state_ending = 3;
+
+
+    public const iron_gen = 42, bronze_gen = 172, gold_gen = 41;
+    public const iron_ing = ItemIds::IRON_INGOT, bronze_ing = ItemIds::BRICK, gold_ing = ItemIds::GOLD_INGOT;
+
+    public  array $ings = ["bronze" => self::bronze_ing, "iron" => self::iron_ing, "gold" => self::gold_ing];
 
 
 
@@ -81,6 +91,7 @@ class Arena
 
         $this->bedwars->getScheduler()->scheduleRepeatingTask($this->task, 20);
         $this->bedwars->getServer()->getPluginManager()->registerEvents($this->listener, $this->bedwars);
+        $this->reset();
         
     }
     public function init() 
@@ -91,7 +102,7 @@ class Arena
             if(!count($this->data["teambed"]) > 0) return;
             if(!count($this->data["generators"]) > 0) return;
             if(!count($this->data["teams"]) > 0) return;
-            if(!count($this->data["shops"]) > 0) return;
+            if(!count($this->data["villager"]) > 0) return;
     
     
             if($this->data["world_game"] == "") return;
@@ -116,7 +127,7 @@ class Arena
         
 
         $this->resetMaps();
-        $this->reset();
+        
 
         if($this->lobby_world != null && $this->game_world != null) 
         {
@@ -254,19 +265,28 @@ class Arena
         
         if($pteam->bed) 
         {
+            //Killed by someone - still bed alive:
             if($by != null) 
             {
     
-                $player->sendMessage(Lang::format("killed_by", 
-                    ["{team}", "{player}"], 
+                $this->sendMessage(Lang::format("killed_by", 
+                    ["{team1}", "{player1}", "{team2}", "{player2}"], 
                     [
+                    $this->GetTeamPretty($player),
+                    $player->getName(),
                     $this->GetTeamPretty($by),
                     $by->getName()
                 ]));
     
-            } else 
+            } else
+            //Died - still bed alive;
             {
-                $player->sendMessage(Lang::get("killed"));
+                $this->sendMessage(Lang::format("died", 
+                    ["{team}", "{player}"], 
+                    [
+                    $this->GetTeamPretty($player),
+                    $player->getName()
+                ]));
             }
 
             $this->ToRespawn($player, $by, $tp);
@@ -274,19 +294,28 @@ class Arena
 
         } else 
         {
+            //Killed by someone - bed not alive;
             if($by != null) 
             {
     
-                $player->sendMessage(Lang::format("killed_by_now_spectator", 
-                    ["{team}", "{player}"], 
+                $this->sendMessage(Lang::format("killed_by_final", 
+                    ["{team1}", "{player1}", "{team2}", "{player2}"], 
                     [
+                    $this->GetTeamPretty($player),
+                    $player->getName(),
                     $this->GetTeamPretty($by),
                     $by->getName()
                 ]));
     
             } else 
+            //Died - bed not alive;
             {
-                $player->sendMessage(Lang::get("killed_now_spectator"));
+                $this->sendMessage(Lang::format("died_final", 
+                    ["{team}", "{player}"], 
+                    [
+                    $this->GetTeamPretty($player),
+                    $player->getName()
+                ]));
             }
 
             $team = $this->teams->GetTeam($player);
@@ -337,13 +366,34 @@ class Arena
 
     public function Respawn(Player $player) 
     {
-        $player->setGamemode(GameMode::SURVIVAL());
+        switch($this->state) 
+        {
+            case self::state_game:
+                $player->setGamemode(GameMode::SURVIVAL());
+                break;
+
+            case self::state_ending:
+                $player->setGamemode(GameMode::SPECTATOR());
+                break;
+
+            case self::state_pregame:
+                $player->setGamemode(GameMode::ADVENTURE());
+                break;
+        }
+        
         $player->setHealth(20);
         $player->getHungerManager()->setFood(20);
         $player->getInventory()->clearAll();
 
 
         $team = $this->teams->GetTeam($player);
+
+        if($team == null || $this->state == self::state_ending) 
+        {
+            $vec = BedWars::StringToVec($this->data["spectator"]);
+            $player->teleport(new Position($vec->x, $vec->y, $vec->z, $this->game_world));
+            return;
+        }
         $vec = BedWars::StringToVec($this->data["teamspawn"][$team->id]);
         $player->teleport(new Position($vec->x, $vec->y, $vec->z, $this->game_world));
 
@@ -470,6 +520,45 @@ class Arena
     }
 
 
+    public function SpawnIngots(int $id) 
+    {
+        $block = 0;
+        $item = 0;
+
+
+        switch($id) 
+        {
+            case 0:
+                $block = self::bronze_gen;
+                $item =  self::bronze_ing;
+                break;
+            case 1:
+                $block = self::iron_gen;
+                $item =  self::iron_ing;
+                break;
+            case 2:
+                $block = self::gold_gen;
+                $item =  self::gold_ing;
+                break;
+        }
+
+
+
+        foreach($this->data["generators"] as $gen) 
+        {
+            $vec = BedWars::StringToVec($gen);
+
+            $bb = $this->game_world->getBlock($vec);
+
+            if($bb->getId() == $block) 
+            {
+                $vec->y++;
+                $this->game_world->dropItem($vec, $this->GetItem($item, 0, 1, ""));
+            }
+        }
+    }
+
+
 
     public function startGame() 
     {
@@ -511,6 +600,8 @@ class Arena
             $player->sendTitle(Lang::format("start_title", ["{team}"], [$team->display]), Lang::format("start_subtitle", ["{players}"], [join(", ", $team->List())]));
             $player->sendMessage(Lang::format("start_team_info", ["{players}"], [join(", ", $team->List())]));
         }
+
+        $this->SpawnVillagers();
     }
 
     public function endGame() 
@@ -562,12 +653,14 @@ class Arena
 
         $this->state = self::state_lobby;
 
-        $this->gameTime = 300;
+        $this->gameTime = 1500;
         $this->lobbyTime = 15;
         $this->preGameTime = 10;
         $this->endTime = 10;
 
         $this->teams = new TeamManager($this, $this->data["teams"], $this->data["playersPerTeam"]);
+
+        $this->task->spawners = $this->task->spawner_times;
     }
 
     public function leaveAll() 
@@ -575,6 +668,22 @@ class Arena
         foreach($this->players + $this->spectators as $player) 
         {
             $this->LeavePlayer($player);
+        }
+    }
+
+    public function SpawnVillagers() 
+    {
+        foreach($this->data["villager"] as $villager) 
+        {
+            $vec = BedWars::StringToLoc($villager, $this->game_world);
+            $vil = new Villager($vec);
+            
+            $vil->setNameTag("§aShop");
+            
+            $vil->setNameTagAlwaysVisible(true);
+            $vil->setNameTagVisible(true);
+
+            $vil->spawnToAll();
         }
     }
 
@@ -636,7 +745,7 @@ class Arena
     public function GetItem(int $id, int $meta, int $count, string $name) :Item 
     {
         $item = $this->GetItemFactory()->get($id, $meta, $count);
-        $item->setCustomName($name);
+        if($name != "") { $item->setCustomName($name); };
 
         return $item;
     }

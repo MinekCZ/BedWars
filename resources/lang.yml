@@ -12,11 +12,13 @@ arena_join: "§7[§a+§7] §7{player}"
 arena_leave: "§7[§c-§7] §7{player}"
 arena_welcome: "\n§7Welcome to §cBedWars!"
 
-killed_by_now_spectator: "\n§7You've been killed by {team} {player}\n§7§oYou're now spectator"
-killed_now_spectator: "§7You're death.\n§7§oYou're now spectator"
+killed_by: "\n§7{team1}§7 {player1} §7was killed by {team2}§7 {player2}"
+died: "§7{team}§7 {player} has died"
 
-killed_by: "\n§7You've been killed by {team} {player}"
-killed: "§7You're death."
+killed_by_final: "\n§cFINAL KILL §7> {team1}§7 {player1} §7was killed by {team2}§7 {player2}§7"
+died_final: "\n§cFINAL DEATH §7> {team}§7 {player} has died"
+
+died_now_spectator: "§7You're death.\n§7§oYou're now spectator"
 
 
 game_starting_soon: "\n§7> Game is starting soon!"

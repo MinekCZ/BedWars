@@ -13,6 +13,14 @@ class ArenaTask extends Task
     public Arena $arena;
 
 
+    /** @var int[] */
+    public array $spawners = [];
+
+    public array $spawner_times = [
+        3, 10, 30
+    ];
+
+
     public function __construct(BedWars $palermotown, Arena $arena)
     {
         $this->palermoTown = $palermotown;
@@ -109,6 +117,18 @@ class ArenaTask extends Task
                 if($this->arena->gameTime == 0) 
                 {
                     $this->arena->endGame();
+                }
+
+
+                for($x = 0; $x < count($this->spawners); $x++) 
+                {
+                    $this->spawners[$x]--;
+
+                    if($this->spawners[$x] <= 0) 
+                    {
+                        $this->spawners[$x] = $this->spawner_times[$x];
+                        $this->arena->SpawnIngots($x);
+                    }
                 }
 
                 break;

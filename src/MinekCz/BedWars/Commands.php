@@ -6,6 +6,8 @@ use pocketmine\command\Command;
 use pocketmine\command\CommandSender;
 use pocketmine\player\Player;
 use pocketmine\block\Block;
+use pocketmine\entity\Location;
+use pocketmine\entity\Villager;
 use pocketmine\math\Vector3;
 use pocketmine\Server;
 use pocketmine\utils\Config;
@@ -136,6 +138,12 @@ class Commands extends Command
 
                 Shop::Use($sender, "");
 
+                break;
+            case "vil":
+                if(!$sender instanceof Player) { return; }
+                var_dump($sender->getLocation());
+                $vil = new Villager($sender->getLocation());
+                $vil->spawnToAll();
                 break;
             case "leave":
                 if(!$sender instanceof Player) { $sender->sendMessage("§cNot Available in console!"); return; }
@@ -345,7 +353,7 @@ class Commands extends Command
                     if(!isset($args[3])) 
                     {
                         $sender->sendMessage($kexists . $tformat);
-                        $sender->sendMessage("§c! §7Available values in this context are: \"player_pos\", \"look_block\", \"look_pos\"");
+                        $sender->sendMessage("§c! §7Available values in this context are: \"player_pos\", \"look_block\", \"look_pos\", \"player_loc\"");
                         return;
                     }
 
@@ -371,6 +379,10 @@ class Commands extends Command
                         case "pos_look":
                         case "look_pos":
                             $value = BedWars::VecToString($sender->getTargetBlock(4, [])->getPosition()->addVector(new Vector3(0, 1, 0)));
+                            break;
+                        case "player_loc":
+                        case "player_location":
+                            $value = BedWars::LocToString($sender->getLocation());
                             break;
                         default:
                             $value = $value_arg;
