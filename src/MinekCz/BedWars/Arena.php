@@ -171,7 +171,7 @@ class Arena
 
         } else 
         {
-            $vec = BedWars::StringToVec($this->data["spawns"][array_rand($this->data["spawns"])]);
+            $vec = BedWars::StringToVec($this->data["spectator"]);
             $player->teleport(new Position($vec->x, $vec->y, $vec->z, $this->game_world));
             $this->InitPlayer($player, true);
         }
