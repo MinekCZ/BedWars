@@ -33,29 +33,21 @@ class ArenaTask extends Task
         if(!count($this->arena->players + $this->arena->spectators) > 0) return;
         $this->arena->CheckPlayers();
 
+        
+
         switch($this->arena->state) 
         {
             case Arena::state_lobby:
 
-                if(count($this->arena->players) == 0) 
+                if(count($this->arena->players) <= 1) 
                 {
-                    $this->arena->lobbyTime = 15;
-                    $this->arena->sendActionBar(Lang::get("waitig_players"));
+                    $this->arena->lobbyTime = 30;
+                    $this->arena->sendActionBar(Lang::get("waiting_player"));
                     break;
                 }
 
                 
                 $this->arena->lobbyTime--;
-
-                foreach($this->arena->players as $player) 
-                {
-                    $player->sendActionBarMessage(Lang::format("lobby_starting_tip", 
-                    ["{team}", "{time}"], 
-                    [
-                    $this->arena->GetTeamPretty($player),  
-                    $this->formatTime($this->arena->lobbyTime)
-                    ]));
-                }
                 
                 
                 if($this->arena->lobbyTime == 0) 
@@ -147,6 +139,11 @@ class ArenaTask extends Task
                 }
 
                 break;
+        }
+
+        foreach($this->arena->players + $this->arena->spectators as $player) 
+        {
+            $this->arena->score->Display($player);
         }
     }
 

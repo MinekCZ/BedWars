@@ -8,6 +8,7 @@ use pocketmine\player\Player;
 use pocketmine\plugin\PluginBase;
 use pocketmine\utils\Config;
 use pocketmine\world\World;
+use pocketmine\network\mcpe\protocol\SetScorePacket;
 
 class BedWars extends PluginBase 
 {
@@ -21,7 +22,7 @@ class BedWars extends PluginBase
     /** @var Arena[] */
     public array $arenas;
 
-    public bool $debug = false;
+    public bool $debug = true;
 
     
     
@@ -34,13 +35,6 @@ class BedWars extends PluginBase
         $this->getServer()->getCommandMap()->register("bedwars", $this->commands, "BedWars");
 
         $this->Load();
-
-        $this->saveResource("lang.yml");
-        $lang = new Config($this->getDataFolder() . "lang.yml", Config::YAML);
-        Lang::$lang = $lang->getAll();
-
-        $shop = new Config($this->getDataFolder(). "shop.yml", Config::DETECT, Shop::GetData());
-        Shop::$data = $shop->getAll();
 
         if($this->debug) 
         {
@@ -261,7 +255,15 @@ class BedWars extends PluginBase
             if(is_file($this->getDataFolder() . "shop.yml")) { unlink($this->getDataFolder() . "shop.yml"); }
         }
 
-        
+
+        if(!is_file($this->getDataFolder() . "lang.yml")) { $this->saveResource("lang.yml"); }
+        if(!is_file($this->getDataFolder() . "shop.yml")) { $shop = new Config($this->getDataFolder(). "shop.yml", Config::DETECT, Shop::GetData()); }
+        $lang = new Config($this->getDataFolder() . "lang.yml", Config::YAML);
+        Lang::$lang = $lang->getAll();
+
+        $shop = new Config($this->getDataFolder(). "shop.yml", Config::DETECT);
+        Shop::$data = $shop->getAll();
+
         $this->arenas = ArenaLoader::LoadArenas();
     }
     

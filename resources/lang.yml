@@ -56,3 +56,13 @@ spectator: "§7Spectator"
 none:      "§7None"
 
 shop: "§a§lShop"
+
+
+sb_title: "§cBedWars"
+sb_map: "§7Map: {map}"
+sb_time: "§7Time: §a{time}"
+sb_team: "§7Team: {team}"
+sb_teams: "{team}§7: {count}§7 {bedAlive}"
+sb_alive: "§a✓"
+sb_not_alive: "§c✕"
+sb_description: "§7your_ip.com"

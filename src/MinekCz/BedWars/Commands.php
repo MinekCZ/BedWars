@@ -136,6 +136,11 @@ class Commands extends Command
 
             case "shop":
 
+                if(!$sender instanceof Player) 
+                {
+                    var_dump(Shop::$data);
+                    return;
+                }
                 Shop::Use($sender, "");
 
                 break;

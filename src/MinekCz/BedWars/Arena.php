@@ -42,6 +42,7 @@ class Arena
     public ArenaTask $task;
     public ArenaListener $listener;
     public TeamManager $teams;
+    public ScoreBoardManager $score;
 
 
     //Worlds::
@@ -89,6 +90,7 @@ class Arena
         $this->task = new ArenaTask($BedWars, $this);
         $this->listener = new ArenaListener($BedWars, $this);
         $this->teams = new TeamManager($this, $this->data["teams"], $this->data["playersPerTeam"]);
+        $this->score = new ScoreBoardManager($BedWars, $this);
 
         $this->bedwars->getScheduler()->scheduleRepeatingTask($this->task, 20);
         $this->bedwars->getServer()->getPluginManager()->registerEvents($this->listener, $this->bedwars);
@@ -332,7 +334,7 @@ class Arena
                 }
             }
 
-            $this->JoinSpectator($player);
+            $this->JoinSpectator($player, true);
         }
 
 
@@ -472,7 +474,7 @@ class Arena
 
 
 
-    public function JoinSpectator(Player $player) 
+    public function JoinSpectator(Player $player, bool $tp = false) 
     {
         $this->spectators[$player->getName()] = $player;
 
@@ -481,6 +483,11 @@ class Arena
 
         if(isset($this->players[$player->getName()])) unset($this->players[$player->getName()]);
 
+        if($tp) 
+        {
+            $vec = BedWars::StringToVec($this->data["spectator"]);
+            $player->teleport(new Position($vec->x, $vec->y, $vec->z, $this->game_world));
+        }
         //$this->teams->CheckTeams();
         $this->CheckPlayers();
     }
@@ -657,9 +664,11 @@ class Arena
         $this->state = self::state_lobby;
 
         $this->gameTime = 1500;
-        $this->lobbyTime = 15;
+        $this->lobbyTime = 30;
         $this->preGameTime = 10;
         $this->endTime = 10;
+
+        $this->listener->lastDamage = [];
 
         $this->teams = new TeamManager($this, $this->data["teams"], $this->data["playersPerTeam"]);
 
@@ -708,6 +717,38 @@ class Arena
 
         $this->lobby_world = $this->getServer()->getWorldManager()->getWorldByName($l);
         $this->game_world  = $this->getServer()->getWorldManager()->getWorldByName($g);
+    }
+
+    public function GetTime(bool $format = false) :string
+    {
+        if($format) 
+        {
+            switch($this->state) 
+            {
+                case Arena::state_lobby:
+                    return $this->task->formatTime($this->lobbyTime);
+                case Arena::state_pregame:
+                    return $this->task->formatTime($this->preGameTime);
+                case Arena::state_game:
+                    return $this->task->formatTime($this->gameTime);
+                case Arena::state_ending:
+                    return $this->task->formatTime($this->endTime);
+            }
+        } else 
+        {
+            switch($this->state) 
+            {
+                case Arena::state_lobby:
+                    return $this->lobbyTime;
+                case Arena::state_pregame:
+                    return $this->preGameTime;
+                case Arena::state_game:
+                    return $this->gameTime;
+                case Arena::state_ending:
+                    return $this->endTime;
+            }
+        }
+        
     }
 
     public function sendMessage(string $msg) 
