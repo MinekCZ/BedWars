@@ -22,7 +22,7 @@ class BedWars extends PluginBase
     /** @var Arena[] */
     public array $arenas;
 
-    public bool $debug = true;
+    public bool $debug = false;
 
     
     

@@ -739,15 +739,18 @@ class Arena
             switch($this->state) 
             {
                 case Arena::state_lobby:
-                    return $this->lobbyTime;
+                    return (string)$this->lobbyTime;
                 case Arena::state_pregame:
-                    return $this->preGameTime;
+                    return (string)$this->preGameTime;
                 case Arena::state_game:
-                    return $this->gameTime;
+                    return (string)$this->gameTime;
                 case Arena::state_ending:
-                    return $this->endTime;
+                    return (string)$this->endTime;
             }
         }
+
+
+        return "";
         
     }
 
