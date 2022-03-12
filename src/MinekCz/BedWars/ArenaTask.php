@@ -58,12 +58,6 @@ class ArenaTask extends Task
             case Arena::state_pregame:
 
                 $this->arena->preGameTime--;
-
-                $this->arena->sendActionBar(Lang::format("pregame_tip", 
-                    ["{time}"], 
-                    [
-                    $this->formatTime($this->arena->preGameTime)
-                ]));
                 
 
                 if($this->arena->preGameTime == 0) 
@@ -76,17 +70,6 @@ class ArenaTask extends Task
             case Arena::state_game:
 
                 $this->arena->gameTime--;
-
-                /** @var Player */
-                foreach($this->arena->players + $this->arena->spectators as $player) 
-                {
-                    $player->sendActionBarMessage(Lang::format("game_tip", 
-                        ["{team}", "{time}"], 
-                        [
-                        $this->arena->GetTeamPretty($player), 
-                        $this->formatTime($this->arena->gameTime)
-                    ]));
-                }
 
                 foreach($this->arena->toRespawn as $respawn) 
                 {
@@ -127,11 +110,6 @@ class ArenaTask extends Task
             case Arena::state_ending:
 
                 $this->arena->endTime--;
-                $this->arena->sendActionBar(Lang::format("endgame_tip", 
-                    ["{time}"], 
-                    [
-                    $this->arena->endTime
-                ]));
 
                 if($this->arena->endTime == 0) 
                 {
