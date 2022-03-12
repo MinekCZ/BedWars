@@ -201,8 +201,8 @@ class Arena
                 $player->getInventory()->clearAll();
                 $player->getOffHandInventory()->clearAll();
     
-                $player->teleport($this->getServer()->getWorldManager()->getDefaultWorld()->getSpawnLocation());
                 $this->score->RemoveScoreBoard($player);
+                $player->teleport($this->getServer()->getWorldManager()->getDefaultWorld()->getSpawnLocation());
             }
             
             $this->teams->LeaveTeam($player);
@@ -224,8 +224,8 @@ class Arena
                 $player->getInventory()->clearAll();
                 $player->getOffHandInventory()->clearAll();
     
-                $player->teleport($this->getServer()->getWorldManager()->getDefaultWorld()->getSpawnLocation());
                 $this->score->RemoveScoreBoard($player);
+                $player->teleport($this->getServer()->getWorldManager()->getDefaultWorld()->getSpawnLocation());
             }
         }
     }
