@@ -54,3 +54,5 @@ start_team_info: "\n§7Your Team: {players}"
 
 spectator: "§7Spectator"
 none:      "§7None"
+
+shop: "§a§lShop"

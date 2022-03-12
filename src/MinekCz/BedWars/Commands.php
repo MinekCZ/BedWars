@@ -230,13 +230,13 @@ class Commands extends Command
 
                 if(!isset($args[1])) { $sender->sendMessage("\n§7Please enter arena name. /bw admin load §c\"arena name\""); return; }
 
-                if(!is_file($this->getDataFolder() . "data\\{$args[1]}.yml")) 
+                if(!is_file($this->getDataFolder() . "data" . DIRECTORY_SEPARATOR . "{$args[1]}.yml")) 
                 {
                     $sender->sendMessage("\n§7Arena with name §c\"{$args[1]}\" §7doesn't exists");
                     return;
                 }
 
-                $config = new Config($this->getDataFolder() . "data\\{$args[1]}.yml", Config::YAML);
+                $config = new Config($this->getDataFolder() . "data" . DIRECTORY_SEPARATOR . "{$args[1]}.yml", Config::YAML);
                 $this->data = $config->getAll();
 
                 $sender->sendMessage("\n§7Arena with name §c\"{$args[1]}\" §7is loaded in memory");

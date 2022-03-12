@@ -211,6 +211,7 @@ class Shop
         };
 
         $form = new SimpleForm($fun);
+        $form->setTitle(Lang::get("shop"));
 
         $keys = array_keys($data);
 

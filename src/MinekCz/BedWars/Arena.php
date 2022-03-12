@@ -7,6 +7,7 @@ use Exception;
 use pocketmine\block\Block;
 use pocketmine\block\BlockFactory;
 use pocketmine\block\BlockLegacyIds;
+use pocketmine\data\bedrock\LegacyBlockIdToStringIdMap;
 use pocketmine\entity\Entity;
 use pocketmine\entity\Location;
 use pocketmine\entity\Villager;
@@ -153,6 +154,8 @@ class Arena
             $player->sendMessage("§cAlready in game");
             return;
         }
+
+        
 
         if($this->state == self::state_lobby && count($this->players) < $this->data["slots"])
         {
@@ -673,12 +676,14 @@ class Arena
 
     public function SpawnVillagers() 
     {
+        $name = Lang::get("shop");
+
         foreach($this->data["villager"] as $villager) 
         {
             $vec = BedWars::StringToLoc($villager, $this->game_world);
             $vil = new Villager($vec);
             
-            $vil->setNameTag("§aShop");
+            $vil->setNameTag($name);
             
             $vil->setNameTagAlwaysVisible(true);
             $vil->setNameTagVisible(true);
