@@ -173,6 +173,13 @@ class ArenaListener implements Listener
 
             if(!$breakBed) { $event->cancel(); }
         }
+
+        $id = $event->getBlock()->getId();
+
+        if($id == Arena::bronze_gen || $id == Arena::iron_gen || $id == Arena::gold_gen) 
+        {
+            $event->cancel();
+        }
     }
 
     public function BlockPlace(BlockPlaceEvent $event) 

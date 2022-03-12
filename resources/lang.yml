@@ -57,6 +57,9 @@ none:      "§7None"
 
 shop: "§a§lShop"
 
+shop_buy: "§7You have successfully bought: {item}"
+shop_cannot_buy: "§7You don't have enough resources to buy this item!"
+
 
 sb_title: "§cBedWars"
 sb_map: "§7Map: {map}"
@@ -66,3 +69,4 @@ sb_teams: "{team}§7: {count}§7 {bedAlive}"
 sb_alive: "§a✓"
 sb_not_alive: "§c✕"
 sb_description: "§7your_ip.com"
+

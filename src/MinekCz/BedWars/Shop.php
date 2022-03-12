@@ -155,7 +155,9 @@ class Shop
                 $player->getInventory()->removeItem($price);
                 $player->getInventory()->addItem($item);
 
-                $player->sendMessage("bought: {$item->getName()}");
+                $player->sendMessage(Lang::format("shop_buy", ["{item}"], [$item->getName()]));
+            } else {
+                $player->sendMessage(Lang::get("shop_cannot_buy"));
             }
 
             $l = explode("/",$path);
@@ -185,9 +187,11 @@ class Shop
 
                         $item = self::GetItem($iid, 0, $imu, "");
                         $player->getInventory()->addItem($item);
-                        $player->sendMessage("bought: {$item->getName()}");
+                        $player->sendMessage(Lang::format("shop_buy", ["{item}"], [$item->getName()]));
 
                     }
+                } else {
+                    $player->sendMessage(Lang::get("shop_cannot_buy"));
                 }
 
 
