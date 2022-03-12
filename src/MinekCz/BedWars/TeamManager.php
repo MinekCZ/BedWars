@@ -2,6 +2,7 @@
 
 namespace MinekCz\BedWars;
 
+use pocketmine\item\ItemIds;
 use pocketmine\player\Player;
 
 class TeamManager 
@@ -74,6 +75,10 @@ class TeamManager
         if($team == null) return;
 
         unset($team->players[$player->getName()]);
+
+        $team->alive_p--;
+
+        
     }
 
     public function GetTeam(Player $player) :?Team
