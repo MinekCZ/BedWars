@@ -1,5 +1,5 @@
 # BedWars
-Popular BedWars minigame!
+Popular BedWars minigame! Very Fun!
 
 How to Setup?
 
