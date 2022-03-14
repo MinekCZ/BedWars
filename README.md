@@ -1,7 +1,42 @@
 # BedWars
-Popular BedWars minigame! Very Fun!
+Popular BedWars minigame! 
 
-How to Setup?
+In BedWars you have to collect items from generators then buy items from a shop, and try and break everyone else's bed!
+
+#Features + BedWarsPro
+
+BedWars:
+
+Editable Language ✔️
+Editable Shop ✔️
+Multi Arena Support ✔️
+3 Types of generators ✔️
+Lobby ❌
+Change Bed Item ❌
+Team Chests ❌
+Cosmetics + Levels Like Hive ❌
+Team Upgrades ❌
+Map Vote ❌
+Enchants ❌
+More in Future! ❌
+
+BedWars Pro (Only On Blossom!!)
+
+Editable Language ✔️
+Editable Shop ✔️
+Multi Arena Support ✔️
+3 Types of generators ✔️
+Lobby ✔️
+Change Bed Item ✔️
+Team Chests ✔️
+Cosmetics + Levels Like Hive ✔️
+Team Upgrades ✔️
+Map Vote ✔️
+Enchants ✔️
+More in Future! ✔️
+
+
+#How to Setup?
 
 This can be quite complicated, so set aside around 30 Minutes!
 
@@ -30,4 +65,36 @@ Then do /bw set teams (team name) 0 (after 1) then 2 I suggest adding a color co
 
 12. Type /bw join (map) to play! Have fun!
 
-NOTE: Want a better version with epic features like cosmetics and team chests? Join Blossom: (NOT OPEN YET)
+#Commands
+
+Basic Commands:
+/bw join <arena_name>
+/bw leave
+/bw list
+
+Admin commands (op only)
+/bw admin create <arena_name>
+/bw admin remove <arena_name>
+/bw admin setup
+/bw | to list commands
+
+Setup Commands (setup only)
+/bw set
+/bw info
+/bw dump | show raw data
+/bw dump [data] | show specific part of data | /pt dump spawns
+
+#Bugs
+
+- Only Works on PM4
+
+- Scoreboard Issue
+
+#Author
+
+Made By MinekCZ: Minek#2962
+
+Read Me By Tuvqlu: Tuvqlu#5650
+
+Play BedWars Pro on Blossom: (NOT OPEN YET) playblossom.net 19132
+NOTE: Want a
