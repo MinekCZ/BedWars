@@ -3,7 +3,7 @@ Popular BedWars minigame!
 
 In BedWars you have to collect items from generators then buy items from a shop, and try and break everyone else's bed!
 
-#Features + BedWarsPro
+# Features + BedWarsPro
 
 BedWars:
 
@@ -36,7 +36,7 @@ Enchants ✔️
 More in Future! ✔️
 
 
-#How to Setup?
+# How to Setup?
 
 This can be quite complicated, so set aside around 30 Minutes!
 
@@ -65,7 +65,7 @@ Then do /bw set teams (team name) 0 (after 1) then 2 I suggest adding a color co
 
 12. Type /bw join (map) to play! Have fun!
 
-#Commands
+# Commands 
 
 Basic Commands:
 /bw join <arena_name>
@@ -84,17 +84,16 @@ Setup Commands (setup only)
 /bw dump | show raw data
 /bw dump [data] | show specific part of data | /pt dump spawns
 
-#Bugs
+# Bugs
 
 - Only Works on PM4
 
 - Scoreboard Issue
 
-#Author
+# Author
 
 Made By MinekCZ: Minek#2962
 
 Read Me By Tuvqlu: Tuvqlu#5650
 
 Play BedWars Pro on Blossom: (NOT OPEN YET) playblossom.net 19132
-NOTE: Want a
