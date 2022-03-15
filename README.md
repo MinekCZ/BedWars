@@ -3,7 +3,7 @@ Popular BedWars minigame!
 
 In BedWars you have to collect items from generators then buy items from a shop, and try and break everyone else's bed!
 
-# Features + BedWarsPro
+# Features + BedWars Blossom
 
 BedWars:
 
@@ -20,7 +20,7 @@ Map Vote ❌
 Enchants ❌
 More in Future! ❌
 
-BedWars Pro (Only On Blossom!!):
+BedWars Blossom (Only On Blossom!!):
 
 Editable Language ✔️
 Editable Shop ✔️
@@ -34,6 +34,8 @@ Team Upgrades ✔️
 Map Vote ✔️
 Enchants ✔️
 More in Future! ✔️
+
+BedWars Blossom is not for sale! You may play it on our new upcoming server which is listed down below!
 
 
 # How to Setup?
