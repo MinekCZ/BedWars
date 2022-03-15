@@ -20,7 +20,7 @@ Map Vote ❌
 Enchants ❌
 More in Future! ❌
 
-BedWars Pro (Only On Blossom!!)
+BedWars Pro (Only On Blossom!!):
 
 Editable Language ✔️
 Editable Shop ✔️
