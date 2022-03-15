@@ -11,7 +11,7 @@ Editable Language ✔️
 Editable Shop ✔️
 Multi Arena Support ✔️
 3 Types of generators ✔️
-Lobby ❌
+Lobby ✔️
 Change Bed Item ❌
 Team Chests ❌
 Cosmetics + Levels Like Hive ❌
