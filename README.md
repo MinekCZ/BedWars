@@ -51,7 +51,7 @@ This can be quite complicated, so set aside around 30 Minutes!
 4. Do /bw set name (name) /bw set world_lobby (world name) /bw set lobby player_pos for spawn position and /bw set world_game (world name)
 
 5. Next let's do map stuff! Set slots with /bw set slots (number)
-Then do /bw set teams (team name) 0 (after 1) then 2 I suggest adding a color code like §aGreen or §cRed 
+Then do /bw set teams (team name) (team format). (ex: team format is §cared or §aGreen
 
 6. Next add villagers by doing /bw set villager 0 (counting up) player_loc
 
