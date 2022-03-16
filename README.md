@@ -90,7 +90,14 @@ Setup Commands (setup only)
 
 - Only Works on PM4
 
-- Scoreboard Issue
+# Dependencies 
+
+- Multi World
+
+# Showcase Video
+
+https://youtu.be/nUjFeqVWgJM
+
 
 # Author
 
