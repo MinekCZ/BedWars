@@ -105,4 +105,4 @@ Made By MinekCZ: Minek#2962
 
 Read Me By Tuvqlu: Tuvqlu#5650
 
-Play BedWars Pro on Blossom: (NOT OPEN YET) playblossom.net 19132
+Play BedWars Pro on Blossom: (NOT OPEN YET) playblossom.net 19132 :D
